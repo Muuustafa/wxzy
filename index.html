@@ -1,1133 +1,959 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Quiz Python - ISI Keur Massar</title>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/react@18/umd/react.production.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/react-dom@18/umd/react-dom.production.min.js"></script>
-  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-  <style>
-    @keyframes gradient {
-      0% { background-position: 0% 50%; }
-      50% { background-position: 100% 50%; }
-      100% { background-position: 0% 50%; }
-    }
-    .gradient-bg {
-      background: linear-gradient(-45deg, #1e3a8a, #3b82f6, #06b6d4, #8b5cf6);
-      background-size: 400% 400%;
-      animation: gradient 15s ease infinite;
-    }
-    .code-block {
-      background: #1e293b;
-      color: #10b981;
-      font-family: 'Courier New', monospace;
-      padding: 1rem;
-      border-radius: 0.5rem;
-      overflow-x: auto;
-      font-size: 0.875rem;
-    }
-    .pulse-animation {
-      animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quiz Python - Licence 2</title>
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    
+    <!-- Firebase -->
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
 </head>
-<body class="bg-gray-50">
-  <div id="root"></div>
+<body>
+    <div id="root"></div>
+    
+    <script type="text/babel">
+        const { useState, useEffect, useRef } = React;
 
-  <script type="text/babel">
-    const { useState, useEffect, useRef } = React;
+        // ðŸ”¥ CONFIGURATION FIREBASE
+        const firebaseConfig = {
+          apiKey: "AIzaSyCYjXM6YrfB862p48g6_mYX66C_La0ZsI0",
+          authDomain: "quiz-python-isikm.firebaseapp.com",
+          projectId: "quiz-python-isikm",
+          storageBucket: "quiz-python-isikm.firebasestorage.app",
+          messagingSenderId: "559369640769",
+          appId: "1:559369640769:web:1ad8cb3d771f134f4d5fc0"
+        };
 
-    // Configuration Firebase
-    const firebaseConfig = {
-      apiKey: "AIzaSyCcWSHWLTFPE3ixU6PBNL3jGmcbI4FoMuo",
-      authDomain: "quizpython-8d65a.firebaseapp.com",
-      databaseURL: "https://quizpython-8d65a-default-rtdb.firebaseio.com",
-      projectId: "quizpython-8d65a",
-      storageBucket: "quizpython-8d65a.firebasestorage.app",
-      messagingSenderId: "297624690086",
-      appId: "1:297624690086:web:3ecae0b3da6ad3aa2e906e"
-    };
-
-    if (!firebase.apps.length) {
-      firebase.initializeApp(firebaseConfig);
-    }
-    const database = firebase.database();
-
-    // Configuration du Quiz - 50 QUESTIONS basées sur les cours
-    const QUIZ_CONFIG = {
-      tempsTotal: 40 * 60, // 40 minutes en secondes
-      questions: [
-        // NIVEAU FACILE (1 point) - Questions 1-10
-        { 
-          id: 1, 
-          code: `x = 10\ny = 20\nprint(x + y)`, 
-          question: "Quelle est la sortie de ce code ?", 
-          options: ["1020", "30", "Erreur", "xy"], 
-          correct: 1, 
-          points: 1, 
-          difficulty: "Facile",
-          chapitre: "Chapitre 1 - Variables"
-        },
-        { 
-          id: 2, 
-          code: `nom = "Python"\nprint(type(nom))`, 
-          question: "Quelle est la sortie de ce code ?", 
-          options: ["<class 'int'>", "<class 'str'>", "str", "string"], 
-          correct: 1, 
-          points: 1, 
-          difficulty: "Facile",
-          chapitre: "Chapitre 1 - Types"
-        },
-        { 
-          id: 3, 
-          code: `liste = [1, 2, 3, 4, 5]\nprint(len(liste))`, 
-          question: "Quelle est la sortie de ce code ?", 
-          options: ["4", "5", "15", "Erreur"], 
-          correct: 1, 
-          points: 1, 
-          difficulty: "Facile",
-          chapitre: "Chapitre 1 - Listes"
-        },
-        { 
-          id: 4, 
-          code: `x = 15\nprint(x % 4)`, 
-          question: "Quelle est la sortie de ce code ?", 
-          options: ["3", "3.75", "4", "0"], 
-          correct: 0, 
-          points: 1, 
-          difficulty: "Facile",
-          chapitre: "Chapitre 1 - Opérateurs"
-        },
-        { 
-          id: 5, 
-          code: `texte = "PYTHON"\nprint(texte.lower())`, 
-          question: "Quelle est la sortie de ce code ?", 
-          options: ["PYTHON", "python", "Python", "pYTHON"], 
-          correct: 1, 
-          points: 1, 
-          difficulty: "Facile",
-          chapitre: "Chapitre 1 - Méthodes string"
-        },
-        { 
-          id: 6, 
-          code: `x = 7\nif x > 5:\n    print("Oui")`, 
-          question: "Quelle est la sortie de ce code ?", 
-          options: ["Oui", "Non", "7", "Rien"], 
-          correct: 0, 
-          points: 1, 
-          difficulty: "Facile",
-          chapitre: "Chapitre 2 - if"
-        },
-        { 
-          id: 7, 
-          code: `print(10 - 7)`, 
-          question: "Quelle est la sortie de ce code ?", 
-          options: ["17", "3", "10", "-7"], 
-          correct: 1, 
-          points: 1, 
-          difficulty: "Facile",
-          chapitre: "Chapitre 1 - Opérations"
-        },
-        { 
-          id: 8, 
-          code: `x = True\nprint(x)`, 
-          question: "Quelle est la sortie de ce code ?", 
-          options: ["1", "True", "true", "Vrai"], 
-          correct: 1, 
-          points: 1, 
-          difficulty: "Facile",
-          chapitre: "Chapitre 1 - Booléens"
-        },
-        { 
-          id: 9, 
-          code: `liste = [10, 20, 30]\nprint(liste[0])`, 
-          question: "Quelle est la sortie de ce code ?", 
-          options: ["0", "10", "20", "[10]"], 
-          correct: 1, 
-          points: 1, 
-          difficulty: "Facile",
-          chapitre: "Chapitre 1 - Indexation"
-        },
-        { 
-          id: 10, 
-          code: `x = 3\ny = 4\nprint(x * y)`, 
-          question: "Quelle est la sortie de ce code ?", 
-          options: ["34", "7", "12", "Erreur"], 
-          correct: 2, 
-          points: 1, 
-          difficulty: "Facile",
-          chapitre: "Chapitre 1 - Multiplication"
-        },
-
-        // NIVEAU ASSEZ FACILE (1.25 points) - Questions 11-20
-        { 
-          id: 11, 
-          code: `for i in range(3):\n    print(i, end=" ")`, 
-          question: "Quelle est la sortie de ce code ?", 
-          options: ["1 2 3", "0 1 2", "0 1 2 3", "1 2"], 
-          correct: 1, 
-          points: 1.25, 
-          difficulty: "Assez Facile",
-          chapitre: "Chapitre 2 - Boucle for"
-        },
-        { 
-          id: 12, 
-          code: `x = "Hello"\ny = "World"\nprint(x + " " + y)`, 
-          question: "Quelle est la sortie de ce code ?", 
-          options: ["HelloWorld", "Hello World", "Hello+World", "Erreur"], 
-          correct: 1, 
-          points: 1.25, 
-          difficulty: "Assez Facile",
-          chapitre: "Chapitre 1 - Concaténation"
-        },
-        { 
-          id: 13, 
-          code: `liste = [5, 2, 8, 1]\nliste.sort()\nprint(liste)`, 
-          question: "Quelle est la sortie de ce code ?", 
-          options: ["[5, 2, 8, 1]", "[1, 2, 5, 8]", "[8, 5, 2, 1]", "Erreur"], 
-          correct: 1, 
-          points: 1.25, 
-          difficulty: "Assez Facile",
-          chapitre: "Chapitre 1 - Méthode sort"
-        },
-        { 
-          id: 14, 
-          code: `x = 17\nprint(x // 5)`, 
-          question: "Quelle est la sortie de ce code ?", 
-          options: ["3.4", "3", "4", "2"], 
-          correct: 1, 
-          points: 1.25, 
-          difficulty: "Assez Facile",
-          chapitre: "Chapitre 1 - Division entière"
-        },
-        { 
-          id: 15, 
-          code: `x = 10\nif x > 20:\n    print("A")\nelse:\n    print("B")`, 
-          question: "Quelle est la sortie de ce code ?", 
-          options: ["A", "B", "AB", "Rien"], 
-          correct: 1, 
-          points: 1.25, 
-          difficulty: "Assez Facile",
-          chapitre: "Chapitre 2 - if/else"
-        },
-        { 
-          id: 16, 
-          code: `texte = "python"\nprint(texte.upper())`, 
-          question: "Quelle est la sortie de ce code ?", 
-          options: ["python", "PYTHON", "Python", "pYTHON"], 
-          correct: 1, 
-          points: 1.25, 
-          difficulty: "Assez Facile",
-          chapitre: "Chapitre 1 - Méthode upper"
-        },
-        { 
-          id: 17, 
-          code: `x = [1, 2, 3]\nx.append(4)\nprint(len(x))`, 
-          question: "Quelle est la sortie de ce code ?", 
-          options: ["3", "4", "7", "Erreur"], 
-          correct: 1, 
-          points: 1.25, 
-          difficulty: "Assez Facile",
-          chapitre: "Chapitre 1 - Méthode append"
-        },
-        { 
-          id: 18, 
-          code: `i = 0\nwhile i < 3:\n    i += 1\nprint(i)`, 
-          question: "Quelle est la sortie de ce code ?", 
-          options: ["0", "2", "3", "4"], 
-          correct: 2, 
-          points: 1.25, 
-          difficulty: "Assez Facile",
-          chapitre: "Chapitre 2 - Boucle while"
-        },
-        { 
-          id: 19, 
-          code: `x = 5 < 10\nprint(x)`, 
-          question: "Quelle est la sortie de ce code ?", 
-          options: ["False", "True", "5", "10"], 
-          correct: 1, 
-          points: 1.25, 
-          difficulty: "Assez Facile",
-          chapitre: "Chapitre 2 - Comparaison"
-        },
-        { 
-          id: 20, 
-          code: `texte = "Bonjour"\nprint(len(texte))`, 
-          question: "Quelle est la sortie de ce code ?", 
-          options: ["6", "7", "8", "Erreur"], 
-          correct: 1, 
-          points: 1.25, 
-          difficulty: "Assez Facile",
-          chapitre: "Chapitre 1 - Fonction len"
-        },
-
-        // NIVEAU MOYEN (1.5 points) - Questions 21-30
-        { 
-          id: 21, 
-          code: `liste = [1, 2, 3, 4, 5]\nprint(liste[1:4])`, 
-          question: "Quelle est la sortie de ce code ?", 
-          options: ["[1, 2, 3]", "[2, 3, 4]", "[1, 2, 3, 4]", "[2, 3]"], 
-          correct: 1, 
-          points: 1.5, 
-          difficulty: "Moyen",
-          chapitre: "Chapitre 1 - Slicing"
-        },
-        { 
-          id: 22, 
-          code: `phrase = "apprendre python"\nmots = phrase.split()\nprint(len(mots))`, 
-          question: "Quelle est la sortie de ce code ?", 
-          options: ["1", "2", "16", "Erreur"], 
-          correct: 1, 
-          points: 1.5, 
-          difficulty: "Moyen",
-          chapitre: "Chapitre 1 - Méthode split"
-        },
-        { 
-          id: 23, 
-          code: `x = 5\ny = 2\nprint(x ** y)`, 
-          question: "Quelle est la sortie de ce code ?", 
-          options: ["7", "10", "25", "52"], 
-          correct: 2, 
-          points: 1.5, 
-          difficulty: "Moyen",
-          chapitre: "Chapitre 1 - Puissance"
-        },
-        { 
-          id: 24, 
-          code: `for i in range(5):\n    if i == 2:\n        continue\n    print(i, end="")`, 
-          question: "Quelle est la sortie de ce code ?", 
-          options: ["01234", "0134", "234", "012"], 
-          correct: 1, 
-          points: 1.5, 
-          difficulty: "Moyen",
-          chapitre: "Chapitre 2 - continue"
-        },
-        { 
-          id: 25, 
-          code: `liste = [10, 20, 30]\nliste.insert(1, 15)\nprint(liste)`, 
-          question: "Quelle est la sortie de ce code ?", 
-          options: ["[15, 10, 20, 30]", "[10, 15, 20, 30]", "[10, 20, 15, 30]", "Erreur"], 
-          correct: 1, 
-          points: 1.5, 
-          difficulty: "Moyen",
-          chapitre: "Chapitre 1 - Méthode insert"
-        },
-        { 
-          id: 26, 
-          code: `x = 12\nif x > 5 and x < 15:\n    print("Vrai")\nelse:\n    print("Faux")`, 
-          question: "Quelle est la sortie de ce code ?", 
-          options: ["Vrai", "Faux", "True", "12"], 
-          correct: 0, 
-          points: 1.5, 
-          difficulty: "Moyen",
-          chapitre: "Chapitre 2 - Opérateur and"
-        },
-        { 
-          id: 27, 
-          code: `texte = "ISI"\nprint(texte * 2)`, 
-          question: "Quelle est la sortie de ce code ?", 
-          options: ["ISI ISI", "ISIISI", "Erreur", "2ISI"], 
-          correct: 1, 
-          points: 1.5, 
-          difficulty: "Moyen",
-          chapitre: "Chapitre 1 - Répétition string"
-        },
-        { 
-          id: 28, 
-          code: `liste = [1, 2, 3]\nliste.reverse()\nprint(liste)`, 
-          question: "Quelle est la sortie de ce code ?", 
-          options: ["[1, 2, 3]", "[3, 2, 1]", "None", "Erreur"], 
-          correct: 1, 
-          points: 1.5, 
-          difficulty: "Moyen",
-          chapitre: "Chapitre 1 - Méthode reverse"
-        },
-        { 
-          id: 29, 
-          code: `def calculer(a, b):\n    return a + b\nprint(calculer(5, 3))`, 
-          question: "Quelle est la sortie de ce code ?", 
-          options: ["53", "8", "None", "Erreur"], 
-          correct: 1, 
-          points: 1.5, 
-          difficulty: "Moyen",
-          chapitre: "Chapitre 1 - Fonctions"
-        },
-        { 
-          id: 30, 
-          code: `x = 8\nresultat = "Pair" if x % 2 == 0 else "Impair"\nprint(resultat)`, 
-          question: "Quelle est la sortie de ce code ?", 
-          options: ["Pair", "Impair", "8", "True"], 
-          correct: 0, 
-          points: 1.5, 
-          difficulty: "Moyen",
-          chapitre: "Chapitre 2 - Opérateur ternaire"
-        },
-
-        // NIVEAU ASSEZ DIFFICILE (1.75 points) - Questions 31-40
-        { 
-          id: 31, 
-          code: `liste = [1, 2, 3]\nliste.extend([4, 5])\nprint(len(liste))`, 
-          question: "Quelle est la sortie de ce code ?", 
-          options: ["3", "4", "5", "2"], 
-          correct: 2, 
-          points: 1.75, 
-          difficulty: "Assez Difficile",
-          chapitre: "Chapitre 1 - Méthode extend"
-        },
-        { 
-          id: 32, 
-          code: `x = "42"\ny = int(x) + 8\nprint(y)`, 
-          question: "Quelle est la sortie de ce code ?", 
-          options: ["428", "50", "Erreur", "42"], 
-          correct: 1, 
-          points: 1.75, 
-          difficulty: "Assez Difficile",
-          chapitre: "Chapitre 1 - Conversion int"
-        },
-        { 
-          id: 33, 
-          code: `somme = 0\nfor i in range(1, 4):\n    somme += i\nprint(somme)`, 
-          question: "Quelle est la sortie de ce code ?", 
-          options: ["4", "6", "10", "0"], 
-          correct: 1, 
-          points: 1.75, 
-          difficulty: "Assez Difficile",
-          chapitre: "Chapitre 2 - Boucle accumulateur"
-        },
-        { 
-          id: 34, 
-          code: `phrase = "a,b,c,d"\nelements = phrase.split(',')\nprint(len(elements))`, 
-          question: "Quelle est la sortie de ce code ?", 
-          options: ["1", "3", "4", "7"], 
-          correct: 2, 
-          points: 1.75, 
-          difficulty: "Assez Difficile",
-          chapitre: "Chapitre 1 - Split avec séparateur"
-        },
-        { 
-          id: 35, 
-          code: `x = 10\nwhile x > 5:\n    x -= 2\n    if x == 6:\n        break\nprint(x)`, 
-          question: "Quelle est la sortie de ce code ?", 
-          options: ["5", "6", "4", "8"], 
-          correct: 1, 
-          points: 1.75, 
-          difficulty: "Assez Difficile",
-          chapitre: "Chapitre 2 - break"
-        },
-        { 
-          id: 36, 
-          code: `def test(n):\n    if n > 10:\n        return "Grand"\n    return "Petit"\nprint(test(5))`, 
-          question: "Quelle est la sortie de ce code ?", 
-          options: ["Grand", "Petit", "5", "None"], 
-          correct: 1, 
-          points: 1.75, 
-          difficulty: "Assez Difficile",
-          chapitre: "Chapitre 1 - Return conditionnel"
-        },
-        { 
-          id: 37, 
-          code: `mots = ["bon", "jour"]\nphrase = " ".join(mots)\nprint(phrase)`, 
-          question: "Quelle est la sortie de ce code ?", 
-          options: ["bonjour", "bon jour", "['bon', 'jour']", "Erreur"], 
-          correct: 1, 
-          points: 1.75, 
-          difficulty: "Assez Difficile",
-          chapitre: "Chapitre 1 - Méthode join"
-        },
-        { 
-          id: 38, 
-          code: `x = "Python"\ny = x.replace("th", "TH")\nprint(y)`, 
-          question: "Quelle est la sortie de ce code ?", 
-          options: ["Python", "PyTHon", "python", "PYTHON"], 
-          correct: 1, 
-          points: 1.75, 
-          difficulty: "Assez Difficile",
-          chapitre: "Chapitre 1 - Méthode replace"
-        },
-        { 
-          id: 39, 
-          code: `liste = [5, 2, 8, 1, 9]\nprint(max(liste) - min(liste))`, 
-          question: "Quelle est la sortie de ce code ?", 
-          options: ["4", "7", "8", "10"], 
-          correct: 2, 
-          points: 1.75, 
-          difficulty: "Assez Difficile",
-          chapitre: "Chapitre 1 - Fonctions min/max"
-        },
-        { 
-          id: 40, 
-          code: `x = 3\ny = 5\nx, y = y, x\nprint(x, y)`, 
-          question: "Quelle est la sortie de ce code ?", 
-          options: ["3 5", "5 3", "8 8", "Erreur"], 
-          correct: 1, 
-          points: 1.75, 
-          difficulty: "Assez Difficile",
-          chapitre: "Chapitre 1 - Swap de variables"
-        },
-
-        // NIVEAU DIFFICILE/TRÈS DIFFICILE (2 points) - Questions 41-50
-        { 
-          id: 41, 
-          code: `texte = "Python"\nprint(texte[::-1])`, 
-          question: "Quelle est la sortie de ce code ?", 
-          options: ["Python", "nohtyP", "Pyth", "thon"], 
-          correct: 1, 
-          points: 2, 
-          difficulty: "Très Difficile",
-          chapitre: "Chapitre 1 - Slicing inverse"
-        },
-        { 
-          id: 42, 
-          code: `def factorielle(n):\n    if n <= 1:\n        return 1\n    return n * factorielle(n - 1)\nprint(factorielle(4))`, 
-          question: "Quelle est la sortie de ce code ?", 
-          options: ["4", "10", "24", "Erreur"], 
-          correct: 2, 
-          points: 2, 
-          difficulty: "Très Difficile",
-          chapitre: "Chapitre 1 - Récursion"
-        },
-        { 
-          id: 43, 
-          code: `nombres = [1, 2, 3, 4, 5]\nresultat = [x * 2 for x in nombres if x % 2 == 0]\nprint(resultat)`, 
-          question: "Quelle est la sortie de ce code ?", 
-          options: ["[2, 4, 6, 8, 10]", "[4, 8]", "[2, 4]", "[1, 2, 3, 4, 5]"], 
-          correct: 1, 
-          points: 2, 
-          difficulty: "Très Difficile",
-          chapitre: "Chapitre 1 - List comprehension"
-        },
-        { 
-          id: 44, 
-          code: `x = [1, 2, 3]\ny = x\ny.append(4)\nprint(len(x))`, 
-          question: "Quelle est la sortie ? (Attention au piège!)", 
-          options: ["3", "4", "7", "Erreur"], 
-          correct: 1, 
-          points: 2, 
-          difficulty: "Très Difficile",
-          chapitre: "Chapitre 1 - Référence vs copie"
-        },
-        { 
-          id: 45, 
-          code: `def fonction(a, b=5, c=10):\n    return a + b + c\nprint(fonction(2, c=3))`, 
-          question: "Quelle est la sortie de ce code ?", 
-          options: ["10", "15", "20", "Erreur"], 
-          correct: 0, 
-          points: 2, 
-          difficulty: "Très Difficile",
-          chapitre: "Chapitre 1 - Arguments nommés"
-        },
-        { 
-          id: 46, 
-          code: `matrice = [[1, 2], [3, 4]]\nprint(matrice[1][0])`, 
-          question: "Quelle est la sortie de ce code ?", 
-          options: ["1", "2", "3", "4"], 
-          correct: 2, 
-          points: 2, 
-          difficulty: "Très Difficile",
-          chapitre: "Chapitre 1 - Liste de listes"
-        },
-        { 
-          id: 47, 
-          code: `compteur = 0\nfor i in range(10):\n    if i % 3 == 0:\n        compteur += 1\nprint(compteur)`, 
-          question: "Quelle est la sortie de ce code ?", 
-          options: ["3", "4", "5", "10"], 
-          correct: 1, 
-          points: 2, 
-          difficulty: "Très Difficile",
-          chapitre: "Chapitre 2 - Compteur conditionnel"
-        },
-        { 
-          id: 48, 
-          code: `def modifier(liste):\n    liste.append(100)\n\nma_liste = [1, 2, 3]\nmodifier(ma_liste)\nprint(len(ma_liste))`, 
-          question: "Quelle est la sortie de ce code ?", 
-          options: ["3", "4", "100", "Erreur"], 
-          correct: 1, 
-          points: 2, 
-          difficulty: "Très Difficile",
-          chapitre: "Chapitre 1 - Passage par référence"
-        },
-        { 
-          id: 49, 
-          code: `nombres = [3, 1, 4, 1, 5, 9, 2]\nprint(sum(nombres) / len(nombres))`, 
-          question: "Quelle est la sortie de ce code (arrondie) ?", 
-          options: ["3.5", "3.57", "4.0", "25"], 
-          correct: 1, 
-          points: 2, 
-          difficulty: "Très Difficile",
-          chapitre: "TP1 - Moyenne"
-        },
-        { 
-          id: 50, 
-          code: `liste = [5, 2, 8, 1, 9]\nliste_triee = sorted(liste)\nprint(liste_triee[len(liste_triee)//2])`, 
-          question: "Quelle est la sortie de ce code (médiane) ?", 
-          options: ["2", "5", "8", "9"], 
-          correct: 1, 
-          points: 2, 
-          difficulty: "Très Difficile",
-          chapitre: "TP1 - Médiane"
+        // Initialiser Firebase
+        if (!firebase.apps.length) {
+          firebase.initializeApp(firebaseConfig);
         }
-      ]
-    };
+        const db = firebase.firestore();
 
-    function QuizApp() {
-      const [etape, setEtape] = useState('accueil');
-      const [nom, setNom] = useState('');
-      const [prenom, setPrenom] = useState('');
-      const [classe, setClasse] = useState('');
-      const [tempsRestant, setTempsRestant] = useState(QUIZ_CONFIG.tempsTotal);
-      const [questionActuelle, setQuestionActuelle] = useState(0);
-      const [reponses, setReponses] = useState({});
-      const [score, setScore] = useState(0);
-      const [showResults, setShowResults] = useState(false);
-      const [detailsReponses, setDetailsReponses] = useState([]);
-      const [showDetailedAnswers, setShowDetailedAnswers] = useState(false);
-      const [sessionId, setSessionId] = useState(null);
-      const timerRef = useRef(null);
+        // ðŸ” CODE D'ACCÃˆS QUIZ
+        const ACCESS_CODE = "QZ2025PYTH";
+        const RECOVERY_CODE = "QZ2025PYTH"; // MÃªme code pour la reprise
 
-      useEffect(() => {
-        if (etape === 'quiz' && tempsRestant > 0) {
-          timerRef.current = setInterval(() => {
-            setTempsRestant(prev => {
-              if (prev <= 1) {
-                clearInterval(timerRef.current);
-                terminerQuiz();
-                return 0;
-              }
-              return prev - 1;
-            });
-          }, 1000);
+        // Configuration du quiz - 50 QUESTIONS
+        const QUIZ_CONFIG = {
+          title: "Quiz Python - Licence 2",
+          duration: 2400,
+          penaltyPerWarning: 2,
+          questions: [
+            { id: 1, code: `x = 5
+y = 3
+z = x + y * 2
+print(z)`, question: "Quelle est la sortie de ce code ?", options: ["16", "11", "13", "Erreur"], correct: 1, points: 1, difficulty: "Facile" },
+            { id: 2, code: `texte = "Python"
+print(type(texte))`, question: "Quel est le type de la variable 'texte' ?", options: ["<class 'int'>", "<class 'str'>", "string", "text"], correct: 1, points: 1, difficulty: "Facile" },
+            { id: 3, code: `liste = [10, 20, 30, 40]
+print(liste[-2])`, question: "Quelle est la sortie de ce code ?", options: ["20", "30", "40", "Erreur"], correct: 1, points: 1, difficulty: "Facile" },
+            { id: 4, code: `x = 17
+print(x % 5)`, question: "Quelle est la sortie de ce code ?", options: ["3", "2", "3.4", "0"], correct: 1, points: 1, difficulty: "Facile" },
+            { id: 5, code: `nom = "DIALLO"
+print(nom.lower())`, question: "Quelle est la sortie de ce code ?", options: ["DIALLO", "diallo", "Diallo", "dIALLO"], correct: 1, points: 1, difficulty: "Facile" },
+            { id: 6, code: `x = 8
+if x > 5:
+    print("Grand")`, question: "Quelle est la sortie de ce code ?", options: ["Grand", "Petit", "8", "Rien"], correct: 0, points: 1, difficulty: "Facile" },
+            { id: 7, code: `print(12 - 5)`, question: "Quelle est la sortie de ce code ?", options: ["17", "7", "12", "-5"], correct: 1, points: 1, difficulty: "Facile" },
+            { id: 8, code: `valeur = False
+print(valeur)`, question: "Quelle est la sortie de ce code ?", options: ["0", "False", "false", "None"], correct: 1, points: 1, difficulty: "Facile" },
+            { id: 9, code: `nombres = [5, 10, 15, 20]
+print(nombres[2])`, question: "Quelle est la sortie de ce code ?", options: ["10", "15", "2", "[15]"], correct: 1, points: 1, difficulty: "Facile" },
+            { id: 10, code: `a = 6
+b = 4
+print(a * b)`, question: "Quelle est la sortie de ce code ?", options: ["64", "10", "24", "2"], correct: 2, points: 1, difficulty: "Facile" },
+            { id: 11, code: `for i in range(2, 5):
+    print(i, end=" ")`, question: "Quelle est la sortie de ce code ?", options: ["2 3 4 5", "2 3 4 ", "3 4 5 ", "0 1 2 "], correct: 1, points: 1.25, difficulty: "Assez Facile" },
+            { id: 12, code: `prenom = "Fatou"
+nom = "Sow"
+print(prenom + " " + nom)`, question: "Quelle est la sortie de ce code ?", options: ["FatouSow", "Fatou Sow", "Fatou+Sow", "Erreur"], correct: 1, points: 1.25, difficulty: "Assez Facile" },
+            { id: 13, code: `ma_liste = [8, 3, 5, 1]
+ma_liste.sort()
+print(ma_liste)`, question: "Quelle est la sortie de ce code ?", options: ["[8, 3, 5, 1]", "[1, 3, 5, 8]", "[8, 5, 3, 1]", "None"], correct: 1, points: 1.25, difficulty: "Assez Facile" },
+            { id: 14, code: `nombre = 23
+print(nombre // 4)`, question: "Quelle est la sortie de ce code ?", options: ["5.75", "5", "6", "4"], correct: 1, points: 1.25, difficulty: "Assez Facile" },
+            { id: 15, code: `age = 18
+if age >= 18:
+    print("Majeur")
+else:
+    print("Mineur")`, question: "Quelle est la sortie de ce code ?", options: ["Majeur", "Mineur", "18", "Rien"], correct: 0, points: 1.25, difficulty: "Assez Facile" },
+            { id: 16, code: `ville = "dakar"
+print(ville.upper())`, question: "Quelle est la sortie de ce code ?", options: ["dakar", "DAKAR", "Dakar", "dAKAR"], correct: 1, points: 1.25, difficulty: "Assez Facile" },
+            { id: 17, code: `fruits = ["pomme", "banane"]
+fruits.append("orange")
+print(len(fruits))`, question: "Quelle est la sortie de ce code ?", options: ["2", "3", "orange", "Erreur"], correct: 1, points: 1.25, difficulty: "Assez Facile" },
+            { id: 18, code: `compteur = 0
+while compteur < 4:
+    compteur += 1
+print(compteur)`, question: "Quelle est la sortie de ce code ?", options: ["3", "4", "5", "0"], correct: 1, points: 1.25, difficulty: "Assez Facile" },
+            { id: 19, code: `resultat = 7 < 12
+print(resultat)`, question: "Quelle est la sortie de ce code ?", options: ["False", "True", "7", "12"], correct: 1, points: 1.25, difficulty: "Assez Facile" },
+            { id: 20, code: `message = "Bonjour ISI"
+print(len(message))`, question: "Quelle est la sortie de ce code ?", options: ["10", "11", "12", "9"], correct: 1, points: 1.25, difficulty: "Assez Facile" },
+            { id: 21, code: `nombres = [2, 4, 6, 8, 10]
+print(nombres[1:4])`, question: "Quelle est la sortie de ce code ?", options: ["[2, 4, 6]", "[4, 6, 8]", "[4, 6, 8, 10]", "[2, 4, 6, 8]"], correct: 1, points: 1.5, difficulty: "Moyen" },
+            { id: 22, code: `texte = "je suis ingenieur"
+mots = texte.split()
+print(len(mots))`, question: "Quelle est la sortie de ce code ?", options: ["1", "3", "18", "4"], correct: 1, points: 1.5, difficulty: "Moyen" },
+            { id: 23, code: `base = 3
+exposant = 4
+print(base ** exposant)`, question: "Quelle est la sortie de ce code ?", options: ["12", "7", "81", "64"], correct: 2, points: 1.5, difficulty: "Moyen" },
+            { id: 24, code: `for num in range(6):
+    if num == 3:
+        continue
+    print(num, end="")`, question: "Quelle est la sortie de ce code ?", options: ["012345", "01245", "12345", "0123"], correct: 1, points: 1.5, difficulty: "Moyen" },
+            { id: 25, code: `animaux = ["chat", "chien"]
+animaux.insert(1, "oiseau")
+print(animaux)`, question: "Quelle est la sortie de ce code ?", options: ["['chat', 'oiseau', 'chien']", "['oiseau', 'chat', 'chien']", "['chat', 'chien', 'oiseau']", "Erreur"], correct: 0, points: 1.5, difficulty: "Moyen" },
+            { id: 26, code: `x = 15
+if x > 10 and x < 20:
+    print("OK")
+else:
+    print("NON")`, question: "Quelle est la sortie de ce code ?", options: ["OK", "NON", "15", "True"], correct: 0, points: 1.5, difficulty: "Moyen" },
+            { id: 27, code: `mot = "CODE"
+print(mot * 3)`, question: "Quelle est la sortie de ce code ?", options: ["CODE CODE CODE", "CODECODECODE", "CODE3", "Erreur"], correct: 1, points: 1.5, difficulty: "Moyen" },
+            { id: 28, code: `valeurs = [5, 10, 15]
+valeurs.reverse()
+print(valeurs)`, question: "Quelle est la sortie de ce code ?", options: ["[5, 10, 15]", "[15, 10, 5]", "None", "[10, 15, 5]"], correct: 1, points: 1.5, difficulty: "Moyen" },
+            { id: 29, code: `def multiplier(a, b):
+    return a * b
+print(multiplier(4, 7))`, question: "Quelle est la sortie de ce code ?", options: ["11", "28", "47", "None"], correct: 1, points: 1.5, difficulty: "Moyen" },
+            { id: 30, code: `n = 9
+type_nombre = "Pair" if n % 2 == 0 else "Impair"
+print(type_nombre)`, question: "Quelle est la sortie de ce code ?", options: ["Pair", "Impair", "9", "True"], correct: 1, points: 1.5, difficulty: "Moyen" },
+            { id: 31, code: `L1 = [1, 2]
+L1.extend([3, 4, 5])
+print(len(L1))`, question: "Quelle est la sortie de ce code ?", options: ["2", "3", "5", "4"], correct: 2, points: 1.75, difficulty: "Assez Difficile" },
+            { id: 32, code: `chaine = "127"
+resultat = int(chaine) + 13
+print(resultat)`, question: "Quelle est la sortie de ce code ?", options: ["12713", "140", "127", "Erreur"], correct: 1, points: 1.75, difficulty: "Assez Difficile" },
+            { id: 33, code: `total = 0
+for i in range(1, 5):
+    total += i
+print(total)`, question: "Quelle est la sortie de ce code ?", options: ["5", "10", "15", "0"], correct: 1, points: 1.75, difficulty: "Assez Difficile" },
+            { id: 34, code: `donnees = "nom,prenom,age"
+liste = donnees.split(',')
+print(len(liste))`, question: "Quelle est la sortie de ce code ?", options: ["1", "2", "3", "15"], correct: 2, points: 1.75, difficulty: "Assez Difficile" },
+            { id: 35, code: `x = 15
+while x > 8:
+    x -= 3
+    if x == 9:
+        break
+print(x)`, question: "Quelle est la sortie de ce code ?", options: ["6", "9", "12", "8"], correct: 1, points: 1.75, difficulty: "Assez Difficile" },
+            { id: 36, code: `def verifier(valeur):
+    if valeur > 100:
+        return "Grand"
+    return "Petit"
+print(verifier(50))`, question: "Quelle est la sortie de ce code ?", options: ["Grand", "Petit", "50", "None"], correct: 1, points: 1.75, difficulty: "Assez Difficile" },
+            { id: 37, code: `mots = ["Bon", "jour"]
+phrase = "-".join(mots)
+print(phrase)`, question: "Quelle est la sortie de ce code ?", options: ["Bonjour", "Bon-jour", "Bon jour", "['Bon', 'jour']"], correct: 1, points: 1.75, difficulty: "Assez Difficile" },
+            { id: 38, code: `texte = "Python3"
+nouveau = texte.replace("3", "2024")
+print(nouveau)`, question: "Quelle est la sortie de ce code ?", options: ["Python3", "Python2024", "Python", "Erreur"], correct: 1, points: 1.75, difficulty: "Assez Difficile" },
+            { id: 39, code: `valeurs = [12, 7, 25, 3, 18]
+print(max(valeurs) - min(valeurs))`, question: "Quelle est la sortie de ce code ?", options: ["15", "22", "25", "28"], correct: 1, points: 1.75, difficulty: "Assez Difficile" },
+            { id: 40, code: `a = 10
+b = 20
+a, b = b, a
+print(a, b)`, question: "Quelle est la sortie de ce code ?", options: ["10 20", "20 10", "30 30", "Erreur"], correct: 1, points: 1.75, difficulty: "Assez Difficile" },
+            { id: 41, code: `mot = "PYTHON"
+print(mot[::-1])`, question: "Quelle est la sortie de ce code ?", options: ["PYTHON", "NOHTYP", "PYTH", "THON"], correct: 1, points: 2, difficulty: "Très Difficile" },
+            { id: 42, code: `def somme_recursif(n):
+    if n <= 0:
+        return 0
+    return n + somme_recursif(n - 1)
+print(somme_recursif(5))`, question: "Quelle est la sortie de ce code ?", options: ["5", "10", "15", "Erreur"], correct: 2, points: 2, difficulty: "Très Difficile" },
+            { id: 43, code: `liste = [1, 2, 3, 4, 5, 6]
+resultat = [x for x in liste if x % 2 == 1]
+print(resultat)`, question: "Quelle est la sortie de ce code ?", options: ["[2, 4, 6]", "[1, 3, 5]", "[1, 2, 3, 4, 5, 6]", "[]"], correct: 1, points: 2, difficulty: "Très Difficile" },
+            { id: 44, code: `liste1 = [1, 2, 3]
+liste2 = liste1
+liste2.append(4)
+print(liste1)`, question: "Quelle est la sortie ? (Piège!)", options: ["[1, 2, 3]", "[1, 2, 3, 4]", "[4]", "Erreur"], correct: 1, points: 2, difficulty: "Très Difficile" },
+            { id: 45, code: `def calcul(a, b=10, c=5):
+    return a + b - c
+print(calcul(5, c=2))`, question: "Quelle est la sortie de ce code ?", options: ["12", "13", "17", "Erreur"], correct: 1, points: 2, difficulty: "Très Difficile" },
+            { id: 46, code: `M = [[1, 2, 3], [4, 5, 6]]
+print(M[1][2])`, question: "Quelle est la sortie de ce code ?", options: ["3", "5", "6", "2"], correct: 2, points: 2, difficulty: "Très Difficile" },
+            { id: 47, code: `compte = 0
+for i in range(1, 11):
+    if i % 2 == 0:
+        compte += 1
+print(compte)`, question: "Quelle est la sortie de ce code ?", options: ["4", "5", "6", "10"], correct: 1, points: 2, difficulty: "Très Difficile" },
+            { id: 48, code: `def ajouter(liste):
+    liste.append(999)
 
-          return () => clearInterval(timerRef.current);
-        }
-      }, [etape, tempsRestant]);
+ma_liste = [1, 2, 3]
+ajouter(ma_liste)
+print(len(ma_liste))`, question: "Quelle est la sortie de ce code ?", options: ["3", "4", "999", "Erreur"], correct: 1, points: 2, difficulty: "Très Difficile" },
+            { id: 49, code: `notes = [12, 15, 18, 14, 16]
+moyenne = sum(notes) / len(notes)
+print(round(moyenne, 1))`, question: "Quelle est la sortie de ce code ?", options: ["14.0", "15.0", "15.5", "14.5"], correct: 1, points: 2, difficulty: "Très Difficile" },
+            { id: 50, code: `data = [8, 3, 5, 1, 9]
+triee = sorted(data)
+mediane = triee[len(triee)//2]
+print(mediane)`, question: "Quelle est la sortie de ce code ?", options: ["3", "5", "8", "9"], correct: 1, points: 2, difficulty: "Très Difficile" }
+          ]
+        };
 
-      const formatTemps = (secondes) => {
-        const mins = Math.floor(secondes / 60);
-        const secs = secondes % 60;
-        return `${mins}:${secs.toString().padStart(2, '0')}`;
-      };
+        function PythonQuizApp() {
+          const [screen, setScreen] = useState('access');
+          const [accessCodeInput, setAccessCodeInput] = useState('');
+          const [studentInfo, setStudentInfo] = useState({ nom: '', prenom: '', classe: '' });
+          const [currentQuestion, setCurrentQuestion] = useState(0);
+          const [answers, setAnswers] = useState({});
+          const [timeLeft, setTimeLeft] = useState(QUIZ_CONFIG.duration);
+          const [tabSwitches, setTabSwitches] = useState(0);
+          const [warnings, setWarnings] = useState([]);
+          const [showNotification, setShowNotification] = useState(false);
+          const [sessionId, setSessionId] = useState(null);
+          const [isBlocked, setIsBlocked] = useState(false);
+          const [showDetailedResults, setShowDetailedResults] = useState(false);
 
-      const demarrerQuiz = () => {
-        if (!nom.trim() || !prenom.trim() || !classe.trim()) {
-          alert("Veuillez remplir tous les champs !");
-          return;
-        }
+          useEffect(() => {
+            if (screen === 'quiz' && timeLeft > 0 && !isBlocked) {
+              const timer = setInterval(() => {
+                setTimeLeft(prev => {
+                  if (prev <= 1) {
+                    handleSubmitQuiz();
+                    return 0;
+                  }
+                  return prev - 1;
+                });
+              }, 1000);
+              return () => clearInterval(timer);
+            }
+          }, [screen, timeLeft, isBlocked]);
 
-        const newSessionId = `${nom}_${prenom}_${Date.now()}`;
-        setSessionId(newSessionId);
+          useEffect(() => {
+            if (screen === 'quiz' && !isBlocked) {
+              const handleVisibilityChange = async () => {
+                if (document.hidden) {
+                  const newCount = tabSwitches + 1;
+                  setTabSwitches(newCount);
+                  const warning = `Changement d'onglet Ã  ${formatTime(QUIZ_CONFIG.duration - timeLeft)}`;
+                  setWarnings(prev => [...prev, warning]);
+                  
+                  if (sessionId) {
+                    await db.collection('quiz_sessions').doc(sessionId).update({
+                      tabSwitches: newCount,
+                      lastWarning: warning,
+                      warnings: firebase.firestore.FieldValue.arrayUnion(warning),
+                      updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+                    });
+                  }
 
-        database.ref(`sessions/${newSessionId}`).set({
-          nom,
-          prenom,
-          classe,
-          dateDebut: new Date().toISOString(),
-          statut: 'en_cours'
-        });
+                  setIsBlocked(true);
+                  
+                  const { value: code } = await Swal.fire({
+                    icon: 'error',
+                    title: 'âš ï¸ QUIZ BLOQUÃ‰ !',
+                    html: `
+                      <p class="mb-4 text-red-600 font-bold">Vous avez changÃ© d'onglet !</p>
+                      <p class="mb-4">Le quiz est maintenant bloquÃ©.</p>
+                      <p class="mb-4">Demandez le <strong>code de reprise</strong> Ã  votre enseignant.</p>
+                      <p class="text-sm text-gray-600">PÃ©nalitÃ© : -${QUIZ_CONFIG.penaltyPerWarning} points</p>
+                    `,
+                    input: 'password',
+                    inputLabel: 'Code de reprise',
+                    inputPlaceholder: 'Entrez le code',
+                    showCancelButton: false,
+                    allowOutsideClick: false,
+                    allowEscapeKey: false,
+                    inputValidator: (value) => {
+                      if (!value) {
+                        return 'Vous devez entrer le code !';
+                      }
+                    }
+                  });
 
-        setEtape('quiz');
-      };
+                  if (code === RECOVERY_CODE) {
+                    setIsBlocked(false);
+                    Swal.fire({
+                      icon: 'success',
+                      title: 'Code acceptÃ©',
+                      text: 'Vous pouvez continuer le quiz.',
+                      timer: 2000,
+                      showConfirmButton: false
+                    });
+                  } else {
+                    setIsBlocked(true);
+                    Swal.fire({
+                      icon: 'error',
+                      title: 'Code incorrect !',
+                      text: 'Demandez le bon code Ã  votre enseignant.',
+                      allowOutsideClick: false
+                    }).then(() => {
+                      window.location.reload();
+                    });
+                  }
+                }
+              };
 
-      const selectionnerReponse = (indexReponse) => {
-        setReponses({
-          ...reponses,
-          [questionActuelle]: indexReponse
-        });
-      };
+              document.addEventListener('visibilitychange', handleVisibilityChange);
 
-      const questionSuivante = () => {
-        if (questionActuelle < QUIZ_CONFIG.questions.length - 1) {
-          setQuestionActuelle(questionActuelle + 1);
-        }
-      };
+              return () => {
+                document.removeEventListener('visibilitychange', handleVisibilityChange);
+              };
+            }
+          }, [screen, tabSwitches, timeLeft, isBlocked, sessionId]);
 
-      const questionPrecedente = () => {
-        if (questionActuelle > 0) {
-          setQuestionActuelle(questionActuelle - 1);
-        }
-      };
-
-      const terminerQuiz = () => {
-        clearInterval(timerRef.current);
-        
-        let scoreTotal = 0;
-        const details = QUIZ_CONFIG.questions.map(q => {
-          const reponseEtudiant = reponses[QUIZ_CONFIG.questions.indexOf(q)] ?? -1;
-          const estCorrecte = reponseEtudiant === q.correct;
-          if (estCorrecte) scoreTotal += q.points;
-          
-          return {
-            question: q.id,
-            reponse: reponseEtudiant,
-            estCorrecte: estCorrecte,
-            pointsObtenus: estCorrecte ? q.points : 0
+          const formatTime = (seconds) => {
+            const mins = Math.floor(seconds / 60);
+            const secs = seconds % 60;
+            return `${mins}:${secs.toString().padStart(2, '0')}`;
           };
-        });
 
-        setScore(scoreTotal);
-        setDetailsReponses(details);
-        setShowResults(true);
-        setEtape('resultats');
+          const normalizeString = (str) => {
+            return str.toLowerCase().trim().replace(/\s+/g, ' ');
+          };
 
-        if (sessionId) {
-          database.ref(`resultats/${sessionId}`).set({
-            nom,
-            prenom,
-            classe,
-            score: scoreTotal,
-            scoreMax: 75,
-            pourcentage: ((scoreTotal / 75) * 100).toFixed(2),
-            nombreReponses: Object.keys(reponses).length,
-            detailsReponses: details,
-            dateFin: new Date().toISOString(),
-            tempsUtilise: QUIZ_CONFIG.tempsTotal - tempsRestant
-          });
+          const checkIfAlreadyTaken = async (nom, prenom, classe) => {
+            const normalizedNom = normalizeString(nom);
+            const normalizedPrenom = normalizeString(prenom);
+            const normalizedClasse = normalizeString(classe);
 
-          database.ref(`sessions/${sessionId}`).update({
-            statut: 'termine',
-            dateFin: new Date().toISOString()
-          });
-        }
-      };
+            try {
+              const snapshot = await db.collection('results').get();
+              return snapshot.docs.some(doc => {
+                const result = doc.data();
+                const resultParts = result.etudiant.split(' ');
+                const resultPrenom = normalizeString(resultParts[0] || '');
+                const resultNom = normalizeString(resultParts.slice(1).join(' ') || '');
+                const resultClasse = normalizeString(result.classe);
 
-      if (etape === 'accueil') {
-        return (
-          <div className="min-h-screen gradient-bg flex items-center justify-center p-4">
-            <div className="bg-white rounded-2xl shadow-2xl max-w-4xl w-full p-8 md:p-12">
-              {/* Header avec logos */}
-              <div className="flex justify-between items-center mb-8">
-                <div className="flex items-center gap-4">
-                  <div className="w-16 h-16 bg-blue-600 rounded-full flex items-center justify-center">
-                    <i className="fas fa-graduation-cap text-white text-2xl"></i>
-                  </div>
-                  <div>
-                    <h1 className="text-3xl font-bold text-gray-800">Quiz Python</h1>
-                    <p className="text-gray-600">Chapitres 1 & 2</p>
+                return resultNom === normalizedNom && 
+                       resultPrenom === normalizedPrenom && 
+                       resultClasse === normalizedClasse;
+              });
+            } catch (error) {
+              console.error("Erreur vÃ©rification doublon:", error);
+              return false;
+            }
+          };
+
+          const handleAccessCodeSubmit = () => {
+            if (accessCodeInput === ACCESS_CODE) {
+              setScreen('start');
+              Swal.fire({
+                icon: 'success',
+                title: 'AccÃ¨s autorisÃ© !',
+                text: 'Vous pouvez maintenant commencer le quiz.',
+                timer: 2000,
+                showConfirmButton: false
+              });
+            } else {
+              Swal.fire({
+                icon: 'error',
+                title: 'Code incorrect !',
+                text: 'Demandez le code d\'accÃ¨s Ã  votre enseignant.',
+                confirmButtonColor: '#DC2626'
+              });
+              setAccessCodeInput('');
+            }
+          };
+
+          const handleStartQuiz = async () => {
+            if (!studentInfo.nom || !studentInfo.prenom || !studentInfo.classe) {
+              Swal.fire({
+                icon: 'warning',
+                title: 'Informations manquantes',
+                text: 'Veuillez remplir tous les champs obligatoires.',
+                confirmButtonColor: '#4F46E5'
+              });
+              return;
+            }
+
+            const alreadyTaken = await checkIfAlreadyTaken(studentInfo.nom, studentInfo.prenom, studentInfo.classe);
+            
+            if (alreadyTaken) {
+              Swal.fire({
+                icon: 'error',
+                title: 'Test dÃ©jÃ  effectuÃ© !',
+                html: `<p><strong>${studentInfo.prenom} ${studentInfo.nom}</strong> de la classe <strong>${studentInfo.classe}</strong></p><p>Vous avez dÃ©jÃ  passÃ© ce test.</p>`,
+                confirmButtonColor: '#DC2626'
+              });
+              return;
+            }
+
+            const result = await Swal.fire({
+              icon: 'info',
+              title: 'PrÃªt Ã  commencer ?',
+              html: `
+                <div class="text-left">
+                  <p class="mb-2"><strong>Nom :</strong> ${studentInfo.nom}</p>
+                  <p class="mb-2"><strong>PrÃ©nom :</strong> ${studentInfo.prenom}</p>
+                  <p class="mb-4"><strong>Classe :</strong> ${studentInfo.classe}</p>
+                  <div class="bg-yellow-50 border-l-4 border-yellow-400 p-3 text-sm">
+                    <p class="font-semibold text-yellow-800">âš ï¸ Rappels :</p>
+                    <ul class="list-disc list-inside mt-2 text-yellow-700">
+                      <li>60 minutes - 50 questions</li>
+                      <li>NE changez PAS d'onglet !</li>
+                      <li>Quiz bloquÃ© si changement</li>
+                    </ul>
                   </div>
                 </div>
-                <div className="w-16 h-16 bg-yellow-400 rounded-full flex items-center justify-center">
-                  <i className="fab fa-python text-blue-600 text-3xl"></i>
-                </div>
-              </div>
+              `,
+              showCancelButton: true,
+              confirmButtonColor: '#4F46E5',
+              confirmButtonText: 'Commencer',
+              cancelButtonText: 'Annuler'
+            });
 
-              {/* Conseils et instructions */}
-              <div className="bg-gradient-to-r from-blue-50 to-purple-50 rounded-xl p-6 mb-8">
-                <h2 className="text-xl font-bold text-gray-800 mb-4 flex items-center gap-2">
-                  <i className="fas fa-lightbulb text-yellow-500"></i>
-                  Conseils Importants
-                </h2>
-                <div className="grid md:grid-cols-2 gap-4 text-sm">
-                  <div className="flex items-start gap-3">
-                    <i className="fas fa-check-circle text-green-500 mt-1"></i>
-                    <p><strong>Lisez attentivement</strong> chaque question et le code associé</p>
-                  </div>
-                  <div className="flex items-start gap-3">
-                    <i className="fas fa-check-circle text-green-500 mt-1"></i>
-                    <p><strong>Analysez le code</strong> ligne par ligne avant de répondre</p>
-                  </div>
-                  <div className="flex items-start gap-3">
-                    <i className="fas fa-check-circle text-green-500 mt-1"></i>
-                    <p><strong>Gérez votre temps</strong> : 40 minutes pour 50 questions</p>
-                  </div>
-                  <div className="flex items-start gap-3">
-                    <i className="fas fa-check-circle text-green-500 mt-1"></i>
-                    <p><strong>Ne paniquez pas</strong> face aux questions difficiles</p>
-                  </div>
-                  <div className="flex items-start gap-3">
-                    <i className="fas fa-check-circle text-green-500 mt-1"></i>
-                    <p><strong>Révisez vos réponses</strong> avant de terminer</p>
-                  </div>
-                  <div className="flex items-start gap-3">
-                    <i className="fas fa-check-circle text-green-500 mt-1"></i>
-                    <p><strong>Testez mentalement</strong> le code si nécessaire</p>
-                  </div>
-                </div>
-              </div>
+            if (result.isConfirmed) {
+              try {
+                const sessionRef = await db.collection('quiz_sessions').add({
+                  etudiant: `${studentInfo.prenom} ${studentInfo.nom}`,
+                  classe: studentInfo.classe,
+                  status: 'started',
+                  startTime: firebase.firestore.FieldValue.serverTimestamp(),
+                  tabSwitches: 0,
+                  warnings: [],
+                  currentQuestion: 0
+                });
+                setSessionId(sessionRef.id);
+              } catch (error) {
+                console.error("Erreur crÃ©ation session:", error);
+              }
 
-              {/* Informations du quiz */}
-              <div className="bg-gray-50 rounded-xl p-6 mb-8">
-                <div className="grid md:grid-cols-3 gap-4 text-center">
-                  <div className="bg-white p-4 rounded-lg shadow">
-                    <i className="fas fa-question-circle text-blue-600 text-3xl mb-2"></i>
-                    <p className="text-2xl font-bold text-gray-800">50</p>
-                    <p className="text-sm text-gray-600">Questions</p>
-                  </div>
-                  <div className="bg-white p-4 rounded-lg shadow">
-                    <i className="fas fa-clock text-purple-600 text-3xl mb-2"></i>
-                    <p className="text-2xl font-bold text-gray-800">40 min</p>
-                    <p className="text-sm text-gray-600">Temps total</p>
-                  </div>
-                  <div className="bg-white p-4 rounded-lg shadow">
-                    <i className="fas fa-star text-yellow-500 text-3xl mb-2"></i>
-                    <p className="text-2xl font-bold text-gray-800">75 pts</p>
-                    <p className="text-sm text-gray-600">Score max</p>
-                  </div>
-                </div>
-              </div>
+              setScreen('quiz');
+              if (document.documentElement.requestFullscreen) {
+                document.documentElement.requestFullscreen().catch(() => {});
+              }
+            }
+          };
 
-              {/* Formulaire */}
-              <div className="space-y-4 mb-6">
-                <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">
-                    <i className="fas fa-user mr-2"></i>Nom
-                  </label>
-                  <input
-                    type="text"
-                    value={nom}
-                    onChange={(e) => setNom(e.target.value)}
-                    className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:outline-none transition"
-                    placeholder="Entrez votre nom"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">
-                    <i className="fas fa-user mr-2"></i>Prénom
-                  </label>
-                  <input
-                    type="text"
-                    value={prenom}
-                    onChange={(e) => setPrenom(e.target.value)}
-                    className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:outline-none transition"
-                    placeholder="Entrez votre prénom"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">
-                    <i className="fas fa-school mr-2"></i>Classe
-                  </label>
-                  <select
-                    value={classe}
-                    onChange={(e) => setClasse(e.target.value)}
-                    className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:outline-none transition"
-                  >
-                    <option value="">Sélectionnez votre classe</option>
-                    <option value="L2 GL">L2 GL</option>
-                    <option value="L2 IAGE">L2 IAGE</option>
-                    <option value="L2 SR">L2 RI</option>
-                    <option value="L2 IA">L2 CS</option>
-                  </select>
-                </div>
-              </div>
+          const handleAnswer = async (questionId, answerIndex) => {
+            setAnswers(prev => ({ ...prev, [questionId]: answerIndex }));
+            
+            if (sessionId) {
+              await db.collection('quiz_sessions').doc(sessionId).update({
+                currentQuestion: currentQuestion + 1,
+                answeredQuestions: Object.keys(answers).length + 1,
+                updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+              });
+            }
+          };
 
-              <button
-                onClick={demarrerQuiz}
-                className="w-full bg-gradient-to-r from-blue-600 to-purple-600 text-white py-4 rounded-lg font-bold text-lg hover:from-blue-700 hover:to-purple-700 transition transform hover:scale-105 shadow-lg"
-              >
-                <i className="fas fa-rocket mr-2"></i>
-                Commencer le Quiz
-              </button>
-            </div>
-          </div>
-        );
-      }
+          const calculateScore = () => {
+            let totalPoints = 0;
+            let maxPoints = 0;
+            
+            QUIZ_CONFIG.questions.forEach(q => {
+              maxPoints += q.points;
+              if (answers[q.id] === q.correct) {
+                totalPoints += q.points;
+              }
+            });
 
-      if (etape === 'quiz') {
-        const question = QUIZ_CONFIG.questions[questionActuelle];
-        const progression = ((questionActuelle + 1) / QUIZ_CONFIG.questions.length) * 100;
+            let noteSur20 = (totalPoints / maxPoints) * 20;
+            const penalty = tabSwitches * QUIZ_CONFIG.penaltyPerWarning;
+            noteSur20 = Math.max(0, noteSur20 - penalty);
 
-        return (
-          <div className="min-h-screen bg-gray-50 py-8 px-4">
-            <div className="max-w-4xl mx-auto">
-              {/* Header */}
-              <div className="bg-white rounded-xl shadow-lg p-6 mb-6">
-                <div className="flex justify-between items-center mb-4">
-                  <div className="flex items-center gap-4">
-                    <div className="w-12 h-12 bg-blue-600 rounded-full flex items-center justify-center">
-                      <i className="fas fa-user text-white"></i>
+            let correct = 0;
+            QUIZ_CONFIG.questions.forEach(q => {
+              if (answers[q.id] === q.correct) {
+                correct++;
+              }
+            });
+
+            return {
+              correct,
+              total: QUIZ_CONFIG.questions.length,
+              totalPoints: totalPoints.toFixed(2),
+              maxPoints: maxPoints,
+              noteSur20: noteSur20.toFixed(2),
+              penalty: penalty,
+              percentage: ((correct / QUIZ_CONFIG.questions.length) * 100).toFixed(2)
+            };
+          };
+
+          const handleSubmitQuiz = async () => {
+            setScreen('results');
+            if (document.exitFullscreen && document.fullscreenElement) {
+              document.exitFullscreen();
+            }
+
+            const results = calculateScore();
+            const exportData = {
+              etudiant: `${studentInfo.prenom} ${studentInfo.nom}`,
+              classe: studentInfo.classe,
+              note: results.noteSur20,
+              pourcentage: results.percentage,
+              correct: results.correct,
+              total: results.total,
+              points: results.totalPoints,
+              maxPoints: results.maxPoints,
+              tentativesTriche: tabSwitches,
+              penalite: results.penalty,
+              dateTest: new Date().toLocaleString('fr-FR'),
+              timestamp: firebase.firestore.FieldValue.serverTimestamp(),
+              duree: formatTime(QUIZ_CONFIG.duration - timeLeft),
+              avertissements: warnings,
+              detailsReponses: QUIZ_CONFIG.questions.map(q => ({
+                question: q.id,
+                reponse: answers[q.id] !== undefined ? answers[q.id] : -1,
+                correct: q.correct,
+                estCorrecte: answers[q.id] === q.correct,
+                points: answers[q.id] === q.correct ? q.points : 0,
+                difficulte: q.difficulty
+              }))
+            };
+
+            try {
+              await db.collection('results').add(exportData);
+              
+              if (sessionId) {
+                await db.collection('quiz_sessions').doc(sessionId).update({
+                  status: 'completed',
+                  endTime: firebase.firestore.FieldValue.serverTimestamp(),
+                  finalNote: results.noteSur20
+                });
+              }
+            } catch (error) {
+              console.error('Erreur Firebase:', error);
+            }
+
+            setTimeout(() => {
+              Swal.fire({
+                icon: results.noteSur20 >= 10 ? 'success' : 'info',
+                title: 'Quiz terminÃ© !',
+                text: `Note : ${results.noteSur20}/20`,
+                timer: 3000
+              });
+            }, 500);
+          };
+
+          if (screen === 'access') {
+            return (
+              <div className="min-h-screen bg-gradient-to-br from-indigo-900 via-purple-900 to-pink-900 flex items-center justify-center p-4">
+                <div className="bg-white rounded-2xl shadow-2xl p-6 sm:p-8 max-w-md w-full">
+                  <div className="text-center mb-6">
+                    <div className="bg-indigo-100 rounded-full w-16 h-16 sm:w-20 sm:h-20 flex items-center justify-center mx-auto mb-4">
+                      <svg className="w-8 h-8 sm:w-10 sm:h-10 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                      </svg>
                     </div>
+                    <h1 className="text-2xl sm:text-3xl font-bold text-gray-800 mb-2">Quiz Python SÃ©curisÃ©</h1>
+                    <p className="text-sm sm:text-base text-gray-600">Entrez le code d'accÃ¨s pour commencer</p>
+                  </div>
+
+                  <div className="bg-yellow-50 border-l-4 border-yellow-400 p-3 sm:p-4 mb-6">
+                    <p className="text-xs sm:text-sm text-yellow-700">
+                      <strong>ðŸ” Code requis</strong> : Demandez le code Ã  votre enseignant
+                    </p>
+                  </div>
+
+                  <div className="space-y-4">
+                    <input
+                      type="password"
+                      value={accessCodeInput}
+                      onChange={(e) => setAccessCodeInput(e.target.value)}
+                      onKeyPress={(e) => e.key === 'Enter' && handleAccessCodeSubmit()}
+                      className="w-full px-4 py-3 text-center text-lg font-mono border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                      placeholder="â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢"
+                      maxLength="10"
+                    />
+                    <button
+                      onClick={handleAccessCodeSubmit}
+                      className="w-full bg-indigo-600 text-white py-3 rounded-lg font-semibold hover:bg-indigo-700 transition-colors shadow-lg"
+                    >
+                      AccÃ©der au Quiz
+                    </button>
+                  </div>
+                </div>
+              </div>
+            );
+          }
+
+          if (screen === 'start') {
+            return (
+              <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4">
+                <div className="bg-white rounded-2xl shadow-2xl p-6 sm:p-8 max-w-md w-full">
+                  <div className="text-center mb-6">
+                    <svg className="w-12 h-12 sm:w-16 sm:h-16 text-indigo-600 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z" />
+                    </svg>
+                    <h1 className="text-2xl sm:text-3xl font-bold text-gray-800 mb-2">{QUIZ_CONFIG.title}</h1>
+                    <p className="text-sm sm:text-base text-gray-600">50 Questions - 60 minutes</p>
+                  </div>
+
+                  <div className="bg-red-50 border-l-4 border-red-400 p-3 sm:p-4 mb-6">
+                    <div className="flex">
+                      <svg className="h-5 w-5 text-red-400 mr-2 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                      </svg>
+                      <div className="text-xs sm:text-sm text-red-700">
+                        <p className="font-semibold mb-2">âš ï¸ ATTENTION :</p>
+                        <ul className="list-disc list-inside space-y-1">
+                          <li>NE changez PAS d'onglet</li>
+                          <li>Quiz BLOQUÃ‰ si changement</li>
+                          <li>-2 points par tentative</li>
+                        </ul>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="space-y-4">
                     <div>
-                      <p className="font-bold text-gray-800">{prenom} {nom}</p>
-                      <p className="text-sm text-gray-600">{classe}</p>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">PrÃ©nom *</label>
+                      <input
+                        type="text"
+                        value={studentInfo.prenom}
+                        onChange={(e) => setStudentInfo(prev => ({ ...prev, prenom: e.target.value }))}
+                        className="w-full px-4 py-2 sm:py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500"
+                        placeholder="Votre prÃ©nom"
+                      />
                     </div>
-                  </div>
-                  <div className={`text-2xl font-bold ${tempsRestant < 300 ? 'text-red-600 pulse-animation' : 'text-blue-600'}`}>
-                    <i className="far fa-clock mr-2"></i>
-                    {formatTemps(tempsRestant)}
-                  </div>
-                </div>
 
-                {/* Barre de progression */}
-                <div className="mb-2">
-                  <div className="flex justify-between text-sm text-gray-600 mb-1">
-                    <span>Question {questionActuelle + 1} / {QUIZ_CONFIG.questions.length}</span>
-                    <span>{progression.toFixed(0)}%</span>
-                  </div>
-                  <div className="w-full bg-gray-200 rounded-full h-3">
-                    <div
-                      className="bg-gradient-to-r from-blue-600 to-purple-600 h-3 rounded-full transition-all duration-300"
-                      style={{ width: `${progression}%` }}
-                    ></div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">Nom *</label>
+                      <input
+                        type="text"
+                        value={studentInfo.nom}
+                        onChange={(e) => setStudentInfo(prev => ({ ...prev, nom: e.target.value }))}
+                        className="w-full px-4 py-2 sm:py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500"
+                        placeholder="Votre nom"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">Classe *</label>
+                      <select
+                        value={studentInfo.classe}
+                        onChange={(e) => setStudentInfo(prev => ({ ...prev, classe: e.target.value }))}
+                        className="w-full px-4 py-2 sm:py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500"
+                      >
+                        <option value="">SÃ©lectionnez</option>
+                        <option value="L2-IAGE">L2 - IAGE</option>
+                        <option value="L2-GL">L2 - GL</option>
+                      </select>
+                    </div>
+
+                    <button
+                      onClick={handleStartQuiz}
+                      className="w-full bg-indigo-600 text-white py-3 rounded-lg font-semibold hover:bg-indigo-700 transition-colors shadow-lg"
+                    >
+                      Commencer le Quiz
+                    </button>
+
+                    <div className="mt-6 pt-4 border-t border-gray-200 text-center">
+                      <a 
+                        href="admin.html" 
+                        className="text-xs text-gray-400 hover:text-indigo-600 transition-colors inline-flex items-center gap-1"
+                      >
+                        <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                        </svg>
+                        Administration
+                      </a>
+                    </div>
                   </div>
                 </div>
               </div>
+            );
+          }
+          
+          if (screen === 'quiz') {
+            const question = QUIZ_CONFIG.questions[currentQuestion];
+            const progress = ((currentQuestion + 1) / QUIZ_CONFIG.questions.length) * 100;
 
-              {/* Question */}
-              <div className="bg-white rounded-xl shadow-lg p-6 md:p-8">
-                <div className="flex items-center gap-3 mb-4">
-                  <span className="px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-sm font-semibold">
-                    {question.difficulty}
-                  </span>
-                  <span className="px-3 py-1 bg-purple-100 text-purple-700 rounded-full text-sm font-semibold">
-                    {question.points} point{question.points > 1 ? 's' : ''}
-                  </span>
-                </div>
-
-                <p className="text-sm text-gray-600 mb-4">
-                  <i className="fas fa-book mr-2"></i>{question.chapitre}
-                </p>
-
-                <div className="code-block mb-6">
-                  <pre>{question.code}</pre>
-                </div>
-
-                <h3 className="text-xl font-bold text-gray-800 mb-6">{question.question}</h3>
-
-                <div className="space-y-3">
-                  {question.options.map((option, index) => (
-                    <button
-                      key={index}
-                      onClick={() => selectionnerReponse(index)}
-                      className={`w-full p-4 rounded-lg border-2 text-left transition transform hover:scale-102 ${
-                        reponses[questionActuelle] === index
-                          ? 'border-blue-600 bg-blue-50'
-                          : 'border-gray-300 hover:border-blue-400'
-                      }`}
-                    >
-                      <div className="flex items-center gap-3">
-                        <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center ${
-                          reponses[questionActuelle] === index
-                            ? 'border-blue-600 bg-blue-600'
-                            : 'border-gray-400'
-                        }`}>
-                          {reponses[questionActuelle] === index && (
-                            <i className="fas fa-check text-white text-xs"></i>
-                          )}
+            return (
+              <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 p-2 sm:p-4">
+                <div className="max-w-4xl mx-auto">
+                  <div className="bg-white rounded-lg shadow-lg p-3 sm:p-4 mb-4">
+                    <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 mb-4">
+                      <div>
+                        <h2 className="text-lg sm:text-xl font-bold text-gray-800">{studentInfo.prenom} {studentInfo.nom}</h2>
+                        <p className="text-xs sm:text-sm text-gray-600">{studentInfo.classe}</p>
+                      </div>
+                      <div className="flex items-center gap-2 sm:gap-4">
+                        {tabSwitches > 0 && (
+                          <div className="flex items-center text-red-600 bg-red-50 px-2 py-1 rounded-full text-xs sm:text-sm">
+                            <svg className="w-4 h-4 sm:w-5 sm:h-5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                            </svg>
+                            <span className="font-semibold">{tabSwitches} Ã— (-2pts)</span>
+                          </div>
+                        )}
+                        <div className={`flex items-center ${timeLeft < 60 ? 'text-red-600 animate-pulse' : 'text-indigo-600'}`}>
+                          <svg className="w-5 h-5 sm:w-6 sm:h-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                          </svg>
+                          <span className="text-xl sm:text-2xl font-bold">{formatTime(timeLeft)}</span>
                         </div>
-                        <span className="font-semibold text-gray-700">{String.fromCharCode(65 + index)}.</span>
-                        <span className="text-gray-800">{option}</span>
-                      </div>
-                    </button>
-                  ))}
-                </div>
-
-                {/* Navigation */}
-                <div className="flex gap-4 mt-8">
-                  <button
-                    onClick={questionPrecedente}
-                    disabled={questionActuelle === 0}
-                    className="flex-1 px-6 py-3 bg-gray-200 text-gray-700 rounded-lg font-semibold hover:bg-gray-300 disabled:opacity-50 disabled:cursor-not-allowed transition"
-                  >
-                    <i className="fas fa-arrow-left mr-2"></i>
-                    Précédent
-                  </button>
-
-                  {questionActuelle < QUIZ_CONFIG.questions.length - 1 ? (
-                    <button
-                      onClick={questionSuivante}
-                      className="flex-1 px-6 py-3 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700 transition"
-                    >
-                      Suivant
-                      <i className="fas fa-arrow-right ml-2"></i>
-                    </button>
-                  ) : (
-                    <button
-                      onClick={terminerQuiz}
-                      className="flex-1 px-6 py-3 bg-green-600 text-white rounded-lg font-semibold hover:bg-green-700 transition"
-                    >
-                      <i className="fas fa-check-circle mr-2"></i>
-                      Terminer
-                    </button>
-                  )}
-                </div>
-              </div>
-            </div>
-          </div>
-        );
-      }
-
-      if (etape === 'resultats') {
-        const pourcentage = ((score / 75) * 100).toFixed(2);
-        const correctes = detailsReponses.filter(d => d.estCorrecte).length;
-        const incorrectes = detailsReponses.filter(d => !d.estCorrecte && d.reponse !== -1).length;
-        const nonRepondues = detailsReponses.filter(d => d.reponse === -1).length;
-
-        return (
-          <div className="min-h-screen bg-gray-50 py-8 px-4">
-            <div className="max-w-4xl mx-auto">
-              {/* Résultats principaux */}
-              <div className="bg-white rounded-xl shadow-lg p-8 mb-6">
-                <div className="text-center mb-8">
-                  <div className="w-24 h-24 bg-gradient-to-r from-blue-600 to-purple-600 rounded-full flex items-center justify-center mx-auto mb-4">
-                    <i className="fas fa-trophy text-white text-4xl"></i>
-                  </div>
-                  <h2 className="text-3xl font-bold text-gray-800 mb-2">Quiz Terminé !</h2>
-                  <p className="text-gray-600">{prenom} {nom} - {classe}</p>
-                </div>
-
-                <div className="grid md:grid-cols-2 gap-6 mb-6">
-                  <div className="bg-blue-50 p-6 rounded-lg text-center">
-                    <p className="text-5xl font-bold text-blue-600 mb-2">{score.toFixed(2)}</p>
-                    <p className="text-gray-600">sur 75 points</p>
-                  </div>
-                  <div className="bg-purple-50 p-6 rounded-lg text-center">
-                    <p className="text-5xl font-bold text-purple-600 mb-2">{pourcentage}%</p>
-                    <p className="text-gray-600">Score final</p>
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-3 gap-4 mb-6">
-                  <div className="bg-green-50 p-4 rounded-lg text-center">
-                    <i className="fas fa-check-circle text-green-600 text-2xl mb-2"></i>
-                    <p className="text-2xl font-bold text-green-600">{correctes}</p>
-                    <p className="text-sm text-gray-600">Correctes</p>
-                  </div>
-                  <div className="bg-red-50 p-4 rounded-lg text-center">
-                    <i className="fas fa-times-circle text-red-600 text-2xl mb-2"></i>
-                    <p className="text-2xl font-bold text-red-600">{incorrectes}</p>
-                    <p className="text-sm text-gray-600">Incorrectes</p>
-                  </div>
-                  <div className="bg-gray-50 p-4 rounded-lg text-center">
-                    <i className="fas fa-question-circle text-gray-600 text-2xl mb-2"></i>
-                    <p className="text-2xl font-bold text-gray-600">{nonRepondues}</p>
-                    <p className="text-sm text-gray-600">Non répondues</p>
-                  </div>
-                </div>
-
-                <button
-                  onClick={() => setShowDetailedAnswers(!showDetailedAnswers)}
-                  className="w-full bg-gradient-to-r from-blue-600 to-purple-600 text-white py-3 rounded-lg font-semibold hover:from-blue-700 hover:to-purple-700 transition mb-4"
-                >
-                  <i className={`fas fa-eye${showDetailedAnswers ? '-slash' : ''} mr-2`}></i>
-                  {showDetailedAnswers ? 'Masquer' : 'Voir'} les détails des réponses
-                </button>
-              </div>
-
-              {/* Détails des réponses */}
-              {showDetailedAnswers && (
-                <div className="space-y-6">
-                  {/* Réponses correctes */}
-                  {correctes > 0 && (
-                    <div className="bg-green-50 rounded-xl p-6 border-2 border-green-200">
-                      <h3 className="text-xl font-bold text-green-600 mb-4 flex items-center gap-2">
-                        <i className="fas fa-check-circle"></i>
-                        Réponses Correctes ({correctes})
-                      </h3>
-                      <div className="space-y-4">
-                        {detailsReponses.filter(d => d.estCorrecte).map((detail) => {
-                          const q = QUIZ_CONFIG.questions.find(question => question.id === detail.question);
-                          return (
-                            <div key={detail.question} className="bg-white border-l-4 border-green-500 p-4 rounded">
-                              <div className="flex justify-between items-start mb-2">
-                                <p className="font-semibold text-gray-800">Question {q.id}</p>
-                                <span className="text-xs bg-green-600 text-white px-2 py-1 rounded">{q.points} pts</span>
-                              </div>
-                              <p className="text-sm text-gray-700 mb-2">{q.question}</p>
-                              <div className="code-block mb-2">
-                                <pre className="text-xs">{q.code}</pre>
-                              </div>
-                              <div className="flex items-center gap-2 text-green-700 text-sm">
-                                <i className="fas fa-check"></i>
-                                <span className="font-semibold">{q.options[q.correct]}</span>
-                              </div>
-                            </div>
-                          );
-                        })}
                       </div>
                     </div>
-                  )}
+                    <div className="w-full bg-gray-200 rounded-full h-2">
+                      <div className="bg-indigo-600 h-2 rounded-full transition-all" style={{ width: `${progress}%` }} />
+                    </div>
+                    <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 mt-2">
+                      <p className="text-xs sm:text-sm text-gray-600">Question {currentQuestion + 1}/{QUIZ_CONFIG.questions.length}</p>
+                      <p className="text-xs sm:text-sm font-semibold text-indigo-600">{question.points} pt - {question.difficulty}</p>
+                    </div>
+                  </div>
 
-                  {/* Réponses incorrectes */}
-                  {incorrectes > 0 && (
-                    <div className="bg-red-50 rounded-xl p-6 border-2 border-red-200">
-                      <h3 className="text-xl font-bold text-red-600 mb-4 flex items-center gap-2">
-                        <i className="fas fa-times-circle"></i>
-                        Réponses Incorrectes ({incorrectes})
-                      </h3>
-                      <div className="space-y-4">
-                        {detailsReponses.filter(d => !d.estCorrecte && d.reponse !== -1).map((detail) => {
-                          const q = QUIZ_CONFIG.questions.find(question => question.id === detail.question);
-                          return (
-                            <div key={detail.question} className="bg-white border-l-4 border-red-500 p-4 rounded">
-                              <div className="flex justify-between items-start mb-2">
-                                <p className="font-semibold text-gray-800">Question {q.id}</p>
-                                <span className="text-xs bg-red-600 text-white px-2 py-1 rounded">0 / {q.points} pts</span>
-                              </div>
-                              <p className="text-sm text-gray-700 mb-2">{q.question}</p>
-                              <div className="code-block mb-2">
-                                <pre className="text-xs">{q.code}</pre>
-                              </div>
-                              <div className="space-y-2">
-                                <div className="flex items-center gap-2 text-red-700 text-sm">
-                                  <i className="fas fa-times"></i>
-                                  <div>
-                                    <span className="font-semibold">Votre réponse : </span>
-                                    <span>{q.options[detail.reponse]}</span>
-                                  </div>
+                  <div className="bg-white rounded-lg shadow-lg p-4 sm:p-6">
+                    <h3 className="text-base sm:text-lg font-semibold text-gray-800 mb-4">{question.question}</h3>
+                    <div className="bg-gray-900 text-green-400 p-3 sm:p-4 rounded-lg font-mono text-xs sm:text-sm overflow-x-auto mb-6">
+                      <pre>{question.code}</pre>
+                    </div>
+
+                    <div className="space-y-2 sm:space-y-3">
+                      {question.options.map((option, index) => (
+                        <button
+                          key={index}
+                          onClick={() => handleAnswer(question.id, index)}
+                          className={`w-full text-left p-3 sm:p-4 rounded-lg border-2 transition-all ${
+                            answers[question.id] === index ? 'border-indigo-600 bg-indigo-50' : 'border-gray-200 hover:border-indigo-300'
+                          }`}
+                        >
+                          <span className="font-semibold text-gray-700">{String.fromCharCode(65 + index)}.</span>{' '}
+                          <span className="text-sm sm:text-base text-gray-800 font-mono">{option}</span>
+                        </button>
+                      ))}
+                    </div>
+
+                    <div className="flex justify-between mt-6">
+                      <button
+                        onClick={() => setCurrentQuestion(prev => Math.max(0, prev - 1))}
+                        disabled={currentQuestion === 0}
+                        className="px-4 sm:px-6 py-2 bg-gray-200 text-gray-700 rounded-lg font-semibold hover:bg-gray-300 disabled:opacity-50 text-sm sm:text-base"
+                      >
+                        PrÃ©cÃ©dent
+                      </button>
+
+                      {currentQuestion < QUIZ_CONFIG.questions.length - 1 ? (
+                        <button
+                          onClick={() => setCurrentQuestion(prev => prev + 1)}
+                          className="px-4 sm:px-6 py-2 bg-indigo-600 text-white rounded-lg font-semibold hover:bg-indigo-700 text-sm sm:text-base"
+                        >
+                          Suivant
+                        </button>
+                      ) : (
+                        <button
+                          onClick={handleSubmitQuiz}
+                          className="px-4 sm:px-6 py-2 bg-green-600 text-white rounded-lg font-semibold hover:bg-green-700 text-sm sm:text-base"
+                        >
+                          Terminer
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            );
+          }
+
+          if (screen === 'results') {
+            const score = calculateScore();
+            const correctQuestions = QUIZ_CONFIG.questions.filter(q => answers[q.id] === q.correct);
+            const incorrectQuestions = QUIZ_CONFIG.questions.filter(q => answers[q.id] !== q.correct && answers[q.id] !== undefined);
+            const unansweredQuestions = QUIZ_CONFIG.questions.filter(q => answers[q.id] === undefined);
+
+            return (
+              <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 p-4">
+                <div className="max-w-4xl mx-auto">
+                  <div className="bg-white rounded-2xl shadow-2xl p-6 sm:p-8 mb-6">
+                    <div className="text-center mb-6 sm:mb-8">
+                      {score.noteSur20 >= 10 ? (
+                        <svg className="w-16 h-16 sm:w-20 sm:h-20 text-green-500 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                      ) : (
+                        <svg className="w-16 h-16 sm:w-20 sm:h-20 text-red-500 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                      )}
+                      <h1 className="text-2xl sm:text-3xl font-bold text-gray-800 mb-2">Quiz TerminÃ© !</h1>
+                      <p className="text-sm sm:text-base text-gray-600">{studentInfo.prenom} {studentInfo.nom} - {studentInfo.classe}</p>
+                    </div>
+
+                    <div className="bg-gradient-to-r from-indigo-500 to-purple-600 text-white rounded-xl p-6 mb-6">
+                      <div className="text-center">
+                        <p className="text-sm opacity-90 mb-2">Note Finale</p>
+                        <p className="text-5xl sm:text-6xl font-bold mb-2">{score.noteSur20}/20</p>
+                        <p className="text-sm opacity-90">{score.correct} bonnes rÃ©ponses sur {score.total}</p>
+                        {score.penalty > 0 && (
+                          <p className="text-sm mt-2 bg-red-500 bg-opacity-30 py-2 px-4 rounded">
+                            PÃ©nalitÃ© : -{score.penalty} points
+                          </p>
+                        )}
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6">
+                      <div className="bg-green-50 p-4 rounded-lg">
+                        <p className="text-xs sm:text-sm text-gray-600">Correctes</p>
+                        <p className="text-xl sm:text-2xl font-bold text-green-600">{correctQuestions.length}</p>
+                      </div>
+                      <div className="bg-red-50 p-4 rounded-lg">
+                        <p className="text-xs sm:text-sm text-gray-600">Incorrectes</p>
+                        <p className="text-xl sm:text-2xl font-bold text-red-600">{incorrectQuestions.length}</p>
+                      </div>
+                      <div className="bg-gray-50 p-4 rounded-lg">
+                        <p className="text-xs sm:text-sm text-gray-600">Non rÃ©pondues</p>
+                        <p className="text-xl sm:text-2xl font-bold text-gray-600">{unansweredQuestions.length}</p>
+                      </div>
+                      <div className="bg-blue-50 p-4 rounded-lg">
+                        <p className="text-xs sm:text-sm text-gray-600">Points</p>
+                        <p className="text-xl sm:text-2xl font-bold text-blue-600">{score.totalPoints}/{score.maxPoints}</p>
+                      </div>
+                    </div>
+
+                    <button
+                      onClick={() => setShowDetailedResults(!showDetailedResults)}
+                      className="w-full bg-indigo-600 text-white py-3 rounded-lg font-semibold hover:bg-indigo-700 transition-colors mb-4 flex items-center justify-center gap-2"
+                    >
+                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                      </svg>
+                      {showDetailedResults ? 'Masquer' : 'Voir'} les dÃ©tails des rÃ©ponses
+                    </button>
+
+                    <button
+                      onClick={() => window.location.reload()}
+                      className="w-full bg-gray-600 text-white py-3 rounded-lg font-semibold hover:bg-gray-700 transition-colors"
+                    >
+                      Retour Ã  l'accueil
+                    </button>
+                  </div>
+
+                  {showDetailedResults && (
+                    <div className="space-y-4">
+                      {/* Questions correctes */}
+                      {correctQuestions.length > 0 && (
+                        <div className="bg-white rounded-lg shadow-lg p-4 sm:p-6">
+                          <h3 className="text-lg sm:text-xl font-bold text-green-600 mb-4 flex items-center gap-2">
+                            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                            RÃ©ponses Correctes ({correctQuestions.length})
+                          </h3>
+                          <div className="space-y-3">
+                            {correctQuestions.map((q) => (
+                              <div key={q.id} className="border-l-4 border-green-500 bg-green-50 p-3 sm:p-4 rounded">
+                                <div className="flex justify-between items-start mb-2">
+                                  <p className="font-semibold text-gray-800 text-sm sm:text-base">Question {q.id}</p>
+                                  <span className="text-xs bg-green-600 text-white px-2 py-1 rounded">{q.points} pts</span>
+                                </div>
+                                <p className="text-xs sm:text-sm text-gray-700 mb-2">{q.question}</p>
+                                <div className="bg-gray-900 text-green-400 p-2 rounded font-mono text-xs overflow-x-auto mb-2">
+                                  <pre>{q.code}</pre>
                                 </div>
                                 <div className="flex items-center gap-2 text-green-700 text-sm">
-                                  <i className="fas fa-check"></i>
+                                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                                  </svg>
+                                  <span className="font-semibold">{q.options[q.correct]}</span>
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Questions incorrectes */}
+                      {incorrectQuestions.length > 0 && (
+                        <div className="bg-white rounded-lg shadow-lg p-4 sm:p-6">
+                          <h3 className="text-lg sm:text-xl font-bold text-red-600 mb-4 flex items-center gap-2">
+                            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                            RÃ©ponses Incorrectes ({incorrectQuestions.length})
+                          </h3>
+                          <div className="space-y-3">
+                            {incorrectQuestions.map((q) => (
+                              <div key={q.id} className="border-l-4 border-red-500 bg-red-50 p-3 sm:p-4 rounded">
+                                <div className="flex justify-between items-start mb-2">
+                                  <p className="font-semibold text-gray-800 text-sm sm:text-base">Question {q.id}</p>
+                                  <span className="text-xs bg-red-600 text-white px-2 py-1 rounded">0 / {q.points} pts</span>
+                                </div>
+                                <p className="text-xs sm:text-sm text-gray-700 mb-2">{q.question}</p>
+                                <div className="bg-gray-900 text-green-400 p-2 rounded font-mono text-xs overflow-x-auto mb-2">
+                                  <pre>{q.code}</pre>
+                                </div>
+                                <div className="space-y-2">
+                                  <div className="flex items-center gap-2 text-red-700 text-sm">
+                                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                                    </svg>
+                                    <div>
+                                      <span className="font-semibold">Votre rÃ©ponse : </span>
+                                      <span>{q.options[answers[q.id]]}</span>
+                                    </div>
+                                  </div>
+                                  <div className="flex items-center gap-2 text-green-700 text-sm">
+                                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                                    </svg>
+                                    <div>
+                                      <span className="font-semibold">Bonne rÃ©ponse : </span>
+                                      <span>{q.options[q.correct]}</span>
+                                    </div>
+                                  </div>
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Questions non rÃ©pondues */}
+                      {unansweredQuestions.length > 0 && (
+                        <div className="bg-white rounded-lg shadow-lg p-4 sm:p-6">
+                          <h3 className="text-lg sm:text-xl font-bold text-gray-600 mb-4 flex items-center gap-2">
+                            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                            Questions Non RÃ©pondues ({unansweredQuestions.length})
+                          </h3>
+                          <div className="space-y-3">
+                            {unansweredQuestions.map((q) => (
+                              <div key={q.id} className="border-l-4 border-gray-400 bg-gray-50 p-3 sm:p-4 rounded">
+                                <div className="flex justify-between items-start mb-2">
+                                  <p className="font-semibold text-gray-800 text-sm sm:text-base">Question {q.id}</p>
+                                  <span className="text-xs bg-gray-600 text-white px-2 py-1 rounded">0 / {q.points} pts</span>
+                                </div>
+                                <p className="text-xs sm:text-sm text-gray-700 mb-2">{q.question}</p>
+                                <div className="bg-gray-900 text-green-400 p-2 rounded font-mono text-xs overflow-x-auto mb-2">
+                                  <pre>{q.code}</pre>
+                                </div>
+                                <div className="flex items-center gap-2 text-green-700 text-sm">
+                                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                                  </svg>
                                   <div>
-                                    <span className="font-semibold">Bonne réponse : </span>
+                                    <span className="font-semibold">Bonne rÃ©ponse : </span>
                                     <span>{q.options[q.correct]}</span>
                                   </div>
                                 </div>
                               </div>
-                            </div>
-                          );
-                        })}
-                      </div>
-                    </div>
-                  )}
-
-                  {/* Questions non répondues */}
-                  {nonRepondues > 0 && (
-                    <div className="bg-gray-50 rounded-xl p-6 border-2 border-gray-300">
-                      <h3 className="text-xl font-bold text-gray-600 mb-4 flex items-center gap-2">
-                        <i className="fas fa-question-circle"></i>
-                        Questions Non Répondues ({nonRepondues})
-                      </h3>
-                      <div className="space-y-4">
-                        {detailsReponses.filter(d => d.reponse === -1).map((detail) => {
-                          const q = QUIZ_CONFIG.questions.find(question => question.id === detail.question);
-                          return (
-                            <div key={detail.question} className="bg-white border-l-4 border-gray-400 p-4 rounded">
-                              <div className="flex justify-between items-start mb-2">
-                                <p className="font-semibold text-gray-800">Question {q.id}</p>
-                                <span className="text-xs bg-gray-600 text-white px-2 py-1 rounded">0 / {q.points} pts</span>
-                              </div>
-                              <p className="text-sm text-gray-700 mb-2">{q.question}</p>
-                              <div className="code-block mb-2">
-                                <pre className="text-xs">{q.code}</pre>
-                              </div>
-                              <div className="flex items-center gap-2 text-green-700 text-sm">
-                                <i className="fas fa-check"></i>
-                                <div>
-                                  <span className="font-semibold">Bonne réponse : </span>
-                                  <span>{q.options[q.correct]}</span>
-                                </div>
-                              </div>
-                            </div>
-                          );
-                        })}
-                      </div>
+                            ))}
+                          </div>
+                        </div>
+                      )}
                     </div>
                   )}
                 </div>
-              )}
-            </div>
-          </div>
-        );
-      }
+              </div>
+            );
+          }
 
-      return null;
-    }
+          return null;
+        }
 
-    ReactDOM.render(<QuizApp />, document.getElementById('root'));
-  </script>
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<PythonQuizApp />);
+    </script>
 </body>
 </html>
-
