@@ -1,643 +1,1113 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Admin - Quiz Python ISI Keur Massar</title>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/react@18/umd/react.production.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/react-dom@18/umd/react-dom.production.min.js"></script>
-  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-  <style>
-    @keyframes gradient {
-      0% { background-position: 0% 50%; }
-      50% { background-position: 100% 50%; }
-      100% { background-position: 0% 50%; }
-    }
-    .gradient-bg {
-      background: linear-gradient(-45deg, #1e3a8a, #3b82f6, #06b6d4, #8b5cf6);
-      background-size: 400% 400%;
-      animation: gradient 15s ease infinite;
-    }
-    .code-block {
-      background: #1e293b;
-      color: #10b981;
-      font-family: 'Courier New', monospace;
-      padding: 0.75rem;
-      border-radius: 0.5rem;
-      overflow-x: auto;
-      font-size: 0.75rem;
-    }
-  </style>
-</head>
-<body class="bg-gray-50">
-  <div id="root"></div>
-
-  <script type="text/babel">
-    const { useState, useEffect } = React;
-
-    const firebaseConfig = {
-      apiKey: "AIzaSyCcWSHWLTFPE3ixU6PBNL3jGmcbI4FoMuo",
-      authDomain: "quizpython-8d65a.firebaseapp.com",
-      databaseURL: "https://quizpython-8d65a-default-rtdb.firebaseio.com",
-      projectId: "quizpython-8d65a",
-      storageBucket: "quizpython-8d65a.firebasestorage.app",
-      messagingSenderId: "297624690086",
-      appId: "1:297624690086:web:3ecae0b3da6ad3aa2e906e"
-    };
-
-    if (!firebase.apps.length) {
-      firebase.initializeApp(firebaseConfig);
-    }
-    const database = firebase.database();
-
-    const ADMIN_CREDENTIALS = {
-      login: 'mustafa',
-      password: '14051994'
-    };
-
-    // LES 50 QUESTIONS (identiques à index.html)
-    const QUIZ_CONFIG = {
-      questions: [
-        { id: 1, code: `x = 10\ny = 20\nprint(x + y)`, question: "Quelle est la sortie de ce code ?", options: ["1020", "30", "Erreur", "xy"], correct: 1, points: 1, difficulty: "Facile", chapitre: "Chapitre 1 - Variables" },
-        { id: 2, code: `nom = "Python"\nprint(type(nom))`, question: "Quelle est la sortie de ce code ?", options: ["<class 'int'>", "<class 'str'>", "str", "string"], correct: 1, points: 1, difficulty: "Facile", chapitre: "Chapitre 1 - Types" },
-        { id: 3, code: `liste = [1, 2, 3, 4, 5]\nprint(len(liste))`, question: "Quelle est la sortie de ce code ?", options: ["4", "5", "15", "Erreur"], correct: 1, points: 1, difficulty: "Facile", chapitre: "Chapitre 1 - Listes" },
-        { id: 4, code: `x = 15\nprint(x % 4)`, question: "Quelle est la sortie de ce code ?", options: ["3", "3.75", "4", "0"], correct: 0, points: 1, difficulty: "Facile", chapitre: "Chapitre 1 - Opérateurs" },
-        { id: 5, code: `texte = "PYTHON"\nprint(texte.lower())`, question: "Quelle est la sortie de ce code ?", options: ["PYTHON", "python", "Python", "pYTHON"], correct: 1, points: 1, difficulty: "Facile", chapitre: "Chapitre 1 - Méthodes string" },
-        { id: 6, code: `x = 7\nif x > 5:\n    print("Oui")`, question: "Quelle est la sortie de ce code ?", options: ["Oui", "Non", "7", "Rien"], correct: 0, points: 1, difficulty: "Facile", chapitre: "Chapitre 2 - if" },
-        { id: 7, code: `print(10 - 7)`, question: "Quelle est la sortie de ce code ?", options: ["17", "3", "10", "-7"], correct: 1, points: 1, difficulty: "Facile", chapitre: "Chapitre 1 - Opérations" },
-        { id: 8, code: `x = True\nprint(x)`, question: "Quelle est la sortie de ce code ?", options: ["1", "True", "true", "Vrai"], correct: 1, points: 1, difficulty: "Facile", chapitre: "Chapitre 1 - Booléens" },
-        { id: 9, code: `liste = [10, 20, 30]\nprint(liste[0])`, question: "Quelle est la sortie de ce code ?", options: ["0", "10", "20", "[10]"], correct: 1, points: 1, difficulty: "Facile", chapitre: "Chapitre 1 - Indexation" },
-        { id: 10, code: `x = 3\ny = 4\nprint(x * y)`, question: "Quelle est la sortie de ce code ?", options: ["34", "7", "12", "Erreur"], correct: 2, points: 1, difficulty: "Facile", chapitre: "Chapitre 1 - Multiplication" },
-        { id: 11, code: `for i in range(3):\n    print(i, end=" ")`, question: "Quelle est la sortie de ce code ?", options: ["1 2 3", "0 1 2", "0 1 2 3", "1 2"], correct: 1, points: 1.25, difficulty: "Assez Facile", chapitre: "Chapitre 2 - Boucle for" },
-        { id: 12, code: `x = "Hello"\ny = "World"\nprint(x + " " + y)`, question: "Quelle est la sortie de ce code ?", options: ["HelloWorld", "Hello World", "Hello+World", "Erreur"], correct: 1, points: 1.25, difficulty: "Assez Facile", chapitre: "Chapitre 1 - Concaténation" },
-        { id: 13, code: `liste = [5, 2, 8, 1]\nliste.sort()\nprint(liste)`, question: "Quelle est la sortie de ce code ?", options: ["[5, 2, 8, 1]", "[1, 2, 5, 8]", "[8, 5, 2, 1]", "Erreur"], correct: 1, points: 1.25, difficulty: "Assez Facile", chapitre: "Chapitre 1 - Méthode sort" },
-        { id: 14, code: `x = 17\nprint(x // 5)`, question: "Quelle est la sortie de ce code ?", options: ["3.4", "3", "4", "2"], correct: 1, points: 1.25, difficulty: "Assez Facile", chapitre: "Chapitre 1 - Division entière" },
-        { id: 15, code: `x = 10\nif x > 20:\n    print("A")\nelse:\n    print("B")`, question: "Quelle est la sortie de ce code ?", options: ["A", "B", "AB", "Rien"], correct: 1, points: 1.25, difficulty: "Assez Facile", chapitre: "Chapitre 2 - if/else" },
-        { id: 16, code: `texte = "python"\nprint(texte.upper())`, question: "Quelle est la sortie de ce code ?", options: ["python", "PYTHON", "Python", "pYTHON"], correct: 1, points: 1.25, difficulty: "Assez Facile", chapitre: "Chapitre 1 - Méthode upper" },
-        { id: 17, code: `x = [1, 2, 3]\nx.append(4)\nprint(len(x))`, question: "Quelle est la sortie de ce code ?", options: ["3", "4", "7", "Erreur"], correct: 1, points: 1.25, difficulty: "Assez Facile", chapitre: "Chapitre 1 - Méthode append" },
-        { id: 18, code: `i = 0\nwhile i < 3:\n    i += 1\nprint(i)`, question: "Quelle est la sortie de ce code ?", options: ["0", "2", "3", "4"], correct: 2, points: 1.25, difficulty: "Assez Facile", chapitre: "Chapitre 2 - Boucle while" },
-        { id: 19, code: `x = 5 < 10\nprint(x)`, question: "Quelle est la sortie de ce code ?", options: ["False", "True", "5", "10"], correct: 1, points: 1.25, difficulty: "Assez Facile", chapitre: "Chapitre 2 - Comparaison" },
-        { id: 20, code: `texte = "Bonjour"\nprint(len(texte))`, question: "Quelle est la sortie de ce code ?", options: ["6", "7", "8", "Erreur"], correct: 1, points: 1.25, difficulty: "Assez Facile", chapitre: "Chapitre 1 - Fonction len" },
-        { id: 21, code: `liste = [1, 2, 3, 4, 5]\nprint(liste[1:4])`, question: "Quelle est la sortie de ce code ?", options: ["[1, 2, 3]", "[2, 3, 4]", "[1, 2, 3, 4]", "[2, 3]"], correct: 1, points: 1.5, difficulty: "Moyen", chapitre: "Chapitre 1 - Slicing" },
-        { id: 22, code: `phrase = "apprendre python"\nmots = phrase.split()\nprint(len(mots))`, question: "Quelle est la sortie de ce code ?", options: ["1", "2", "16", "Erreur"], correct: 1, points: 1.5, difficulty: "Moyen", chapitre: "Chapitre 1 - Méthode split" },
-        { id: 23, code: `x = 5\ny = 2\nprint(x ** y)`, question: "Quelle est la sortie de ce code ?", options: ["7", "10", "25", "52"], correct: 2, points: 1.5, difficulty: "Moyen", chapitre: "Chapitre 1 - Puissance" },
-        { id: 24, code: `for i in range(5):\n    if i == 2:\n        continue\n    print(i, end="")`, question: "Quelle est la sortie de ce code ?", options: ["01234", "0134", "234", "012"], correct: 1, points: 1.5, difficulty: "Moyen", chapitre: "Chapitre 2 - continue" },
-        { id: 25, code: `liste = [10, 20, 30]\nliste.insert(1, 15)\nprint(liste)`, question: "Quelle est la sortie de ce code ?", options: ["[15, 10, 20, 30]", "[10, 15, 20, 30]", "[10, 20, 15, 30]", "Erreur"], correct: 1, points: 1.5, difficulty: "Moyen", chapitre: "Chapitre 1 - Méthode insert" },
-        { id: 26, code: `x = 12\nif x > 5 and x < 15:\n    print("Vrai")\nelse:\n    print("Faux")`, question: "Quelle est la sortie de ce code ?", options: ["Vrai", "Faux", "True", "12"], correct: 0, points: 1.5, difficulty: "Moyen", chapitre: "Chapitre 2 - Opérateur and" },
-        { id: 27, code: `texte = "ISI"\nprint(texte * 2)`, question: "Quelle est la sortie de ce code ?", options: ["ISI ISI", "ISIISI", "Erreur", "2ISI"], correct: 1, points: 1.5, difficulty: "Moyen", chapitre: "Chapitre 1 - Répétition string" },
-        { id: 28, code: `liste = [1, 2, 3]\nliste.reverse()\nprint(liste)`, question: "Quelle est la sortie de ce code ?", options: ["[1, 2, 3]", "[3, 2, 1]", "None", "Erreur"], correct: 1, points: 1.5, difficulty: "Moyen", chapitre: "Chapitre 1 - Méthode reverse" },
-        { id: 29, code: `def calculer(a, b):\n    return a + b\nprint(calculer(5, 3))`, question: "Quelle est la sortie de ce code ?", options: ["53", "8", "None", "Erreur"], correct: 1, points: 1.5, difficulty: "Moyen", chapitre: "Chapitre 1 - Fonctions" },
-        { id: 30, code: `x = 8\nresultat = "Pair" if x % 2 == 0 else "Impair"\nprint(resultat)`, question: "Quelle est la sortie de ce code ?", options: ["Pair", "Impair", "8", "True"], correct: 0, points: 1.5, difficulty: "Moyen", chapitre: "Chapitre 2 - Opérateur ternaire" },
-        { id: 31, code: `liste = [1, 2, 3]\nliste.extend([4, 5])\nprint(len(liste))`, question: "Quelle est la sortie de ce code ?", options: ["3", "4", "5", "2"], correct: 2, points: 1.75, difficulty: "Assez Difficile", chapitre: "Chapitre 1 - Méthode extend" },
-        { id: 32, code: `x = "42"\ny = int(x) + 8\nprint(y)`, question: "Quelle est la sortie de ce code ?", options: ["428", "50", "Erreur", "42"], correct: 1, points: 1.75, difficulty: "Assez Difficile", chapitre: "Chapitre 1 - Conversion int" },
-        { id: 33, code: `somme = 0\nfor i in range(1, 4):\n    somme += i\nprint(somme)`, question: "Quelle est la sortie de ce code ?", options: ["4", "6", "10", "0"], correct: 1, points: 1.75, difficulty: "Assez Difficile", chapitre: "Chapitre 2 - Boucle accumulateur" },
-        { id: 34, code: `phrase = "a,b,c,d"\nelements = phrase.split(',')\nprint(len(elements))`, question: "Quelle est la sortie de ce code ?", options: ["1", "3", "4", "7"], correct: 2, points: 1.75, difficulty: "Assez Difficile", chapitre: "Chapitre 1 - Split avec séparateur" },
-        { id: 35, code: `x = 10\nwhile x > 5:\n    x -= 2\n    if x == 6:\n        break\nprint(x)`, question: "Quelle est la sortie de ce code ?", options: ["5", "6", "4", "8"], correct: 1, points: 1.75, difficulty: "Assez Difficile", chapitre: "Chapitre 2 - break" },
-        { id: 36, code: `def test(n):\n    if n > 10:\n        return "Grand"\n    return "Petit"\nprint(test(5))`, question: "Quelle est la sortie de ce code ?", options: ["Grand", "Petit", "5", "None"], correct: 1, points: 1.75, difficulty: "Assez Difficile", chapitre: "Chapitre 1 - Return conditionnel" },
-        { id: 37, code: `mots = ["bon", "jour"]\nphrase = " ".join(mots)\nprint(phrase)`, question: "Quelle est la sortie de ce code ?", options: ["bonjour", "bon jour", "['bon', 'jour']", "Erreur"], correct: 1, points: 1.75, difficulty: "Assez Difficile", chapitre: "Chapitre 1 - Méthode join" },
-        { id: 38, code: `x = "Python"\ny = x.replace("th", "TH")\nprint(y)`, question: "Quelle est la sortie de ce code ?", options: ["Python", "PyTHon", "python", "PYTHON"], correct: 1, points: 1.75, difficulty: "Assez Difficile", chapitre: "Chapitre 1 - Méthode replace" },
-        { id: 39, code: `liste = [5, 2, 8, 1, 9]\nprint(max(liste) - min(liste))`, question: "Quelle est la sortie de ce code ?", options: ["4", "7", "8", "10"], correct: 2, points: 1.75, difficulty: "Assez Difficile", chapitre: "Chapitre 1 - Fonctions min/max" },
-        { id: 40, code: `x = 3\ny = 5\nx, y = y, x\nprint(x, y)`, question: "Quelle est la sortie de ce code ?", options: ["3 5", "5 3", "8 8", "Erreur"], correct: 1, points: 1.75, difficulty: "Assez Difficile", chapitre: "Chapitre 1 - Swap de variables" },
-        { id: 41, code: `texte = "Python"\nprint(texte[::-1])`, question: "Quelle est la sortie de ce code ?", options: ["Python", "nohtyP", "Pyth", "thon"], correct: 1, points: 2, difficulty: "Très Difficile", chapitre: "Chapitre 1 - Slicing inverse" },
-        { id: 42, code: `def factorielle(n):\n    if n <= 1:\n        return 1\n    return n * factorielle(n - 1)\nprint(factorielle(4))`, question: "Quelle est la sortie de ce code ?", options: ["4", "10", "24", "Erreur"], correct: 2, points: 2, difficulty: "Très Difficile", chapitre: "Chapitre 1 - Récursion" },
-        { id: 43, code: `nombres = [1, 2, 3, 4, 5]\nresultat = [x * 2 for x in nombres if x % 2 == 0]\nprint(resultat)`, question: "Quelle est la sortie de ce code ?", options: ["[2, 4, 6, 8, 10]", "[4, 8]", "[2, 4]", "[1, 2, 3, 4, 5]"], correct: 1, points: 2, difficulty: "Très Difficile", chapitre: "Chapitre 1 - List comprehension" },
-        { id: 44, code: `x = [1, 2, 3]\ny = x\ny.append(4)\nprint(len(x))`, question: "Quelle est la sortie ? (Attention au piège!)", options: ["3", "4", "7", "Erreur"], correct: 1, points: 2, difficulty: "Très Difficile", chapitre: "Chapitre 1 - Référence vs copie" },
-        { id: 45, code: `def fonction(a, b=5, c=10):\n    return a + b + c\nprint(fonction(2, c=3))`, question: "Quelle est la sortie de ce code ?", options: ["10", "15", "20", "Erreur"], correct: 0, points: 2, difficulty: "Très Difficile", chapitre: "Chapitre 1 - Arguments nommés" },
-        { id: 46, code: `matrice = [[1, 2], [3, 4]]\nprint(matrice[1][0])`, question: "Quelle est la sortie de ce code ?", options: ["1", "2", "3", "4"], correct: 2, points: 2, difficulty: "Très Difficile", chapitre: "Chapitre 1 - Liste de listes" },
-        { id: 47, code: `compteur = 0\nfor i in range(10):\n    if i % 3 == 0:\n        compteur += 1\nprint(compteur)`, question: "Quelle est la sortie de ce code ?", options: ["3", "4", "5", "10"], correct: 1, points: 2, difficulty: "Très Difficile", chapitre: "Chapitre 2 - Compteur conditionnel" },
-        { id: 48, code: `def modifier(liste):\n    liste.append(100)\n\nma_liste = [1, 2, 3]\nmodifier(ma_liste)\nprint(len(ma_liste))`, question: "Quelle est la sortie de ce code ?", options: ["3", "4", "100", "Erreur"], correct: 1, points: 2, difficulty: "Très Difficile", chapitre: "Chapitre 1 - Passage par référence" },
-        { id: 49, code: `nombres = [3, 1, 4, 1, 5, 9, 2]\nprint(sum(nombres) / len(nombres))`, question: "Quelle est la sortie de ce code (arrondie) ?", options: ["3.5", "3.57", "4.0", "25"], correct: 1, points: 2, difficulty: "Très Difficile", chapitre: "TP1 - Moyenne" },
-        { id: 50, code: `liste = [5, 2, 8, 1, 9]\nliste_triee = sorted(liste)\nprint(liste_triee[len(liste_triee)//2])`, question: "Quelle est la sortie de ce code (médiane) ?", options: ["2", "5", "8", "9"], correct: 1, points: 2, difficulty: "Très Difficile", chapitre: "TP1 - Médiane" }
-      ]
-    };
-
-    function AdminDashboard() {
-      const [isAuthenticated, setIsAuthenticated] = useState(() => {
-        return localStorage.getItem('adminAuthenticated') === 'true';
-      });
-      const [loginInput, setLoginInput] = useState('');
-      const [passwordInput, setPasswordInput] = useState('');
-      const [results, setResults] = useState([]);
-      const [activeSessions, setActiveSessions] = useState([]);
-      const [selectedStudent, setSelectedStudent] = useState(null);
-      const [filter, setFilter] = useState('all');
-      const [classFilter, setClassFilter] = useState('all');
-      const [loading, setLoading] = useState(false);
-      const [showSessions, setShowSessions] = useState(false);
-      const [showDetailedAnswers, setShowDetailedAnswers] = useState(false);
-
-      useEffect(() => {
-        if (isAuthenticated) {
-          const resultsRef = database.ref('resultats');
-          resultsRef.on('value', (snapshot) => {
-            const data = snapshot.val();
-            if (data) {
-              const resultsArray = Object.keys(data).map(key => ({
-                id: key,
-                ...data[key]
-              }));
-              setResults(resultsArray);
-            }
-          });
-
-          const sessionsRef = database.ref('sessions');
-          sessionsRef.on('value', (snapshot) => {
-            const data = snapshot.val();
-            if (data) {
-              const sessionsArray = Object.keys(data).map(key => ({
-                id: key,
-                ...data[key]
-              }));
-              setActiveSessions(sessionsArray.filter(s => s.statut === 'en_cours'));
-            }
-          });
-
-          return () => {
-            resultsRef.off();
-            sessionsRef.off();
-          };
-        }
-      }, [isAuthenticated]);
-
-      const handleLogin = () => {
-        if (loginInput === ADMIN_CREDENTIALS.login && passwordInput === ADMIN_CREDENTIALS.password) {
-          setIsAuthenticated(true);
-          localStorage.setItem('adminAuthenticated', 'true');
-          setLoginInput('');
-          setPasswordInput('');
-        } else {
-          alert('Identifiant ou mot de passe incorrect !');
-        }
-      };
-
-      const handleLogout = () => {
-        setIsAuthenticated(false);
-        localStorage.removeItem('adminAuthenticated');
-      };
-
-      const deleteResult = (id) => {
-        if (confirm('Êtes-vous sûr de vouloir supprimer ce résultat ?')) {
-          database.ref(`resultats/${id}`).remove();
-        }
-      };
-
-      const exportToCSV = () => {
-        const headers = ['Nom', 'Prénom', 'Classe', 'Score', 'Score Max', 'Pourcentage', 'Date'];
-        const rows = filteredResults.map(r => [
-          r.nom, r.prenom, r.classe, r.score, r.scoreMax, r.pourcentage + '%',
-          new Date(r.dateFin).toLocaleString('fr-FR')
-        ]);
-        
-        let csv = headers.join(',') + '\n';
-        rows.forEach(row => {
-          csv += row.join(',') + '\n';
-        });
-
-        const blob = new Blob([csv], { type: 'text/csv' });
-        const url = window.URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = `resultats_quiz_${new Date().toISOString().split('T')[0]}.csv`;
-        a.click();
-      };
-
-      const filteredResults = results.filter(r => {
-        if (classFilter !== 'all' && r.classe !== classFilter) return false;
-        if (filter === 'passed' && parseFloat(r.pourcentage) < 50) return false;
-        if (filter === 'failed' && parseFloat(r.pourcentage) >= 50) return false;
-        return true;
-      });
-
-      const stats = {
-        total: results.length,
-        average: results.length > 0 ? (results.reduce((sum, r) => sum + parseFloat(r.pourcentage), 0) / results.length).toFixed(2) : 0,
-        passed: results.filter(r => parseFloat(r.pourcentage) >= 50).length,
-        failed: results.filter(r => parseFloat(r.pourcentage) < 50).length
-      };
-
-      if (!isAuthenticated) {
-        return (
-          <div className="min-h-screen gradient-bg flex items-center justify-center p-4">
-            <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full p-8">
-              <div className="text-center mb-8">
-                <div className="w-20 h-20 bg-blue-600 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <i className="fas fa-shield-alt text-white text-3xl"></i>
-                </div>
-                <h1 className="text-3xl font-bold text-gray-800 mb-2">Administration</h1>
-                <p className="text-gray-600">Quiz Python - ISI</p>
-              </div>
-
-              <div className="space-y-4">
-                <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">
-                    <i className="fas fa-user mr-2"></i>Identifiant
-                  </label>
-                  <input
-                    type="text"
-                    value={loginInput}
-                    onChange={(e) => setLoginInput(e.target.value)}
-                    onKeyPress={(e) => e.key === 'Enter' && handleLogin()}
-                    className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:outline-none"
-                    placeholder="Entrez votre identifiant"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">
-                    <i className="fas fa-lock mr-2"></i>Mot de passe
-                  </label>
-                  <input
-                    type="password"
-                    value={passwordInput}
-                    onChange={(e) => setPasswordInput(e.target.value)}
-                    onKeyPress={(e) => e.key === 'Enter' && handleLogin()}
-                    className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:outline-none"
-                    placeholder="Entrez votre mot de passe"
-                  />
-                </div>
-
-                <button
-                  onClick={handleLogin}
-                  className="w-full bg-gradient-to-r from-blue-600 to-purple-600 text-white py-3 rounded-lg font-semibold hover:from-blue-700 hover:to-purple-700 transition"
-                >
-                  <i className="fas fa-sign-in-alt mr-2"></i>
-                  Se connecter
-                </button>
-              </div>
-            </div>
-          </div>
-        );
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Administration - Quiz Python</title>
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    
+    <!-- Firebase -->
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+    
+    <style>
+      @keyframes pulse-ring {
+        0% { transform: scale(0.95); opacity: 1; }
+        50% { transform: scale(1.05); opacity: 0.7; }
+        100% { transform: scale(0.95); opacity: 1; }
       }
+      .animate-pulse-ring {
+        animation: pulse-ring 2s ease-in-out infinite;
+      }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+    
+    <script type="text/babel">
+        const { useState, useEffect } = React;
 
-      return (
-        <div className="min-h-screen bg-gray-50 p-4 md:p-8">
-          {/* Header */}
-          <div className="bg-white rounded-xl shadow-lg p-6 mb-6">
-            <div className="flex flex-col md:flex-row justify-between items-center gap-4">
-              <div className="flex items-center gap-4">
-                <div className="w-16 h-16 bg-gradient-to-r from-blue-600 to-purple-600 rounded-full flex items-center justify-center">
-                  <i className="fas fa-user-shield text-white text-2xl"></i>
-                </div>
-                <div>
-                  <h1 className="text-2xl font-bold text-gray-800">Tableau de Bord Admin</h1>
-                  <p className="text-gray-600">Quiz Python - ISI Keur Massar</p>
-                </div>
-              </div>
-              <div className="flex gap-3">
-                <button
-                  onClick={() => setShowSessions(!showSessions)}
-                  className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition flex items-center gap-2"
-                >
-                  <i className="fas fa-users"></i>
-                  Sessions ({activeSessions.length})
-                </button>
-                <button
-                  onClick={handleLogout}
-                  className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition"
-                >
-                  <i className="fas fa-sign-out-alt mr-2"></i>
-                  Déconnexion
-                </button>
-              </div>
-            </div>
-          </div>
+        // ðŸ”¥ CONFIGURATION FIREBASE
+        const firebaseConfig = {
+          apiKey: "AIzaSyCYjXM6YrfB862p48g6_mYX66C_La0ZsI0",
+          authDomain: "quiz-python-isikm.firebaseapp.com",
+          projectId: "quiz-python-isikm",
+          storageBucket: "quiz-python-isikm.firebasestorage.app",
+          messagingSenderId: "559369640769",
+          appId: "1:559369640769:web:1ad8cb3d771f134f4d5fc0"
+        };
 
-          {/* Statistiques */}
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
-            <div className="bg-white p-6 rounded-xl shadow-lg">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-gray-600 text-sm">Total</p>
-                  <p className="text-3xl font-bold text-blue-600">{stats.total}</p>
-                </div>
-                <i className="fas fa-users text-blue-600 text-3xl"></i>
-              </div>
-            </div>
-            <div className="bg-white p-6 rounded-xl shadow-lg">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-gray-600 text-sm">Moyenne</p>
-                  <p className="text-3xl font-bold text-purple-600">{stats.average}%</p>
-                </div>
-                <i className="fas fa-chart-line text-purple-600 text-3xl"></i>
-              </div>
-            </div>
-            <div className="bg-white p-6 rounded-xl shadow-lg">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-gray-600 text-sm">Réussis</p>
-                  <p className="text-3xl font-bold text-green-600">{stats.passed}</p>
-                </div>
-                <i className="fas fa-check-circle text-green-600 text-3xl"></i>
-              </div>
-            </div>
-            <div className="bg-white p-6 rounded-xl shadow-lg">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-gray-600 text-sm">Échoués</p>
-                  <p className="text-3xl font-bold text-red-600">{stats.failed}</p>
-                </div>
-                <i className="fas fa-times-circle text-red-600 text-3xl"></i>
-              </div>
-            </div>
-          </div>
+        if (!firebase.apps.length) {
+          firebase.initializeApp(firebaseConfig);
+        }
+        const db = firebase.firestore();
 
-          {/* Filtres et Export */}
-          <div className="bg-white rounded-xl shadow-lg p-6 mb-6">
-            <div className="flex flex-col md:flex-row gap-4 items-center">
-              <div className="flex-1">
-                <label className="block text-sm font-semibold text-gray-700 mb-2">Classe</label>
-                <select
-                  value={classFilter}
-                  onChange={(e) => setClassFilter(e.target.value)}
-                  className="w-full px-4 py-2 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:outline-none"
-                >
-                  <option value="all">Toutes les classes</option>
-                  <option value="L2 GL">L2 GL</option>
-                  <option value="L2 IAGE">L2 IAGE</option>
-                  <option value="L2 SR">L2 RI</option>
-                  <option value="L2 IA">L2 CS</option>
-                </select>
-              </div>
-              <div className="flex-1">
-                <label className="block text-sm font-semibold text-gray-700 mb-2">Statut</label>
-                <select
-                  value={filter}
-                  onChange={(e) => setFilter(e.target.value)}
-                  className="w-full px-4 py-2 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:outline-none"
-                >
-                  <option value="all">Tous</option>
-                  <option value="passed">Réussis (≥50%)</option>
-                  <option value="failed">Échoués (&lt;50%)</option>
-                </select>
-              </div>
-              <div className="flex-1 flex items-end">
-                <button
-                  onClick={exportToCSV}
-                  className="w-full px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition flex items-center justify-center gap-2"
-                >
-                  <i className="fas fa-file-csv"></i>
-                  Exporter CSV
-                </button>
-              </div>
-            </div>
-          </div>
+        const ADMIN_CREDENTIALS = {
+          login: 'mustafa',
+          password: '14051994'
+        };
 
-          {/* Liste des résultats */}
-          <div className="bg-white rounded-xl shadow-lg overflow-hidden">
-            <div className="overflow-x-auto">
-              <table className="w-full">
-                <thead className="bg-gradient-to-r from-blue-600 to-purple-600 text-white">
-                  <tr>
-                    <th className="px-4 py-3 text-left">Étudiant</th>
-                    <th className="px-4 py-3 text-left">Classe</th>
-                    <th className="px-4 py-3 text-center">Score</th>
-                    <th className="px-4 py-3 text-center">%</th>
-                    <th className="px-4 py-3 text-left">Date</th>
-                    <th className="px-4 py-3 text-center">Actions</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {filteredResults.map((result, index) => (
-                    <tr key={result.id} className={`border-b ${index % 2 === 0 ? 'bg-gray-50' : 'bg-white'} hover:bg-blue-50 transition`}>
-                      <td className="px-4 py-3 font-semibold">{result.prenom} {result.nom}</td>
-                      <td className="px-4 py-3">{result.classe}</td>
-                      <td className="px-4 py-3 text-center font-bold">{result.score.toFixed(2)} / {result.scoreMax}</td>
-                      <td className="px-4 py-3 text-center">
-                        <span className={`px-3 py-1 rounded-full text-sm font-semibold ${
-                          parseFloat(result.pourcentage) >= 50 ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'
-                        }`}>
-                          {result.pourcentage}%
-                        </span>
-                      </td>
-                      <td className="px-4 py-3 text-sm">{new Date(result.dateFin).toLocaleString('fr-FR')}</td>
-                      <td className="px-4 py-3">
-                        <div className="flex gap-2 justify-center">
-                          <button
-                            onClick={() => {setSelectedStudent(result); setShowDetailedAnswers(false);}}
-                            className="px-3 py-1 bg-blue-600 text-white rounded hover:bg-blue-700 transition text-sm"
-                          >
-                            <i className="fas fa-eye"></i>
-                          </button>
-                          <button
-                            onClick={() => deleteResult(result.id)}
-                            className="px-3 py-1 bg-red-600 text-white rounded hover:bg-red-700 transition text-sm"
-                          >
-                            <i className="fas fa-trash"></i>
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </div>
+        // Configuration du quiz - 50 QUESTIONS (pour affichage dÃ©tails)
+        const QUIZ_CONFIG = {
+          questions: [
+            { id: 1, code: `x = 5
+y = 3
+z = x + y * 2
+print(z)`, question: "Quelle est la sortie de ce code ?", options: ["16", "11", "13", "Erreur"], correct: 1, points: 1, difficulty: "Facile" },
+            { id: 2, code: `texte = "Python"
+print(type(texte))`, question: "Quel est le type de la variable 'texte' ?", options: ["<class 'int'>", "<class 'str'>", "string", "text"], correct: 1, points: 1, difficulty: "Facile" },
+            { id: 3, code: `liste = [10, 20, 30, 40]
+print(liste[-2])`, question: "Quelle est la sortie de ce code ?", options: ["20", "30", "40", "Erreur"], correct: 1, points: 1, difficulty: "Facile" },
+            { id: 4, code: `x = 17
+print(x % 5)`, question: "Quelle est la sortie de ce code ?", options: ["3", "2", "3.4", "0"], correct: 1, points: 1, difficulty: "Facile" },
+            { id: 5, code: `nom = "DIALLO"
+print(nom.lower())`, question: "Quelle est la sortie de ce code ?", options: ["DIALLO", "diallo", "Diallo", "dIALLO"], correct: 1, points: 1, difficulty: "Facile" },
+            { id: 6, code: `x = 8
+if x > 5:
+    print("Grand")`, question: "Quelle est la sortie de ce code ?", options: ["Grand", "Petit", "8", "Rien"], correct: 0, points: 1, difficulty: "Facile" },
+            { id: 7, code: `print(12 - 5)`, question: "Quelle est la sortie de ce code ?", options: ["17", "7", "12", "-5"], correct: 1, points: 1, difficulty: "Facile" },
+            { id: 8, code: `valeur = False
+print(valeur)`, question: "Quelle est la sortie de ce code ?", options: ["0", "False", "false", "None"], correct: 1, points: 1, difficulty: "Facile" },
+            { id: 9, code: `nombres = [5, 10, 15, 20]
+print(nombres[2])`, question: "Quelle est la sortie de ce code ?", options: ["10", "15", "2", "[15]"], correct: 1, points: 1, difficulty: "Facile" },
+            { id: 10, code: `a = 6
+b = 4
+print(a * b)`, question: "Quelle est la sortie de ce code ?", options: ["64", "10", "24", "2"], correct: 2, points: 1, difficulty: "Facile" },
+            { id: 11, code: `for i in range(2, 5):
+    print(i, end=" ")`, question: "Quelle est la sortie de ce code ?", options: ["2 3 4 5", "2 3 4 ", "3 4 5 ", "0 1 2 "], correct: 1, points: 1.25, difficulty: "Assez Facile" },
+            { id: 12, code: `prenom = "Fatou"
+nom = "Sow"
+print(prenom + " " + nom)`, question: "Quelle est la sortie de ce code ?", options: ["FatouSow", "Fatou Sow", "Fatou+Sow", "Erreur"], correct: 1, points: 1.25, difficulty: "Assez Facile" },
+            { id: 13, code: `ma_liste = [8, 3, 5, 1]
+ma_liste.sort()
+print(ma_liste)`, question: "Quelle est la sortie de ce code ?", options: ["[8, 3, 5, 1]", "[1, 3, 5, 8]", "[8, 5, 3, 1]", "None"], correct: 1, points: 1.25, difficulty: "Assez Facile" },
+            { id: 14, code: `nombre = 23
+print(nombre // 4)`, question: "Quelle est la sortie de ce code ?", options: ["5.75", "5", "6", "4"], correct: 1, points: 1.25, difficulty: "Assez Facile" },
+            { id: 15, code: `age = 18
+if age >= 18:
+    print("Majeur")
+else:
+    print("Mineur")`, question: "Quelle est la sortie de ce code ?", options: ["Majeur", "Mineur", "18", "Rien"], correct: 0, points: 1.25, difficulty: "Assez Facile" },
+            { id: 16, code: `ville = "dakar"
+print(ville.upper())`, question: "Quelle est la sortie de ce code ?", options: ["dakar", "DAKAR", "Dakar", "dAKAR"], correct: 1, points: 1.25, difficulty: "Assez Facile" },
+            { id: 17, code: `fruits = ["pomme", "banane"]
+fruits.append("orange")
+print(len(fruits))`, question: "Quelle est la sortie de ce code ?", options: ["2", "3", "orange", "Erreur"], correct: 1, points: 1.25, difficulty: "Assez Facile" },
+            { id: 18, code: `compteur = 0
+while compteur < 4:
+    compteur += 1
+print(compteur)`, question: "Quelle est la sortie de ce code ?", options: ["3", "4", "5", "0"], correct: 1, points: 1.25, difficulty: "Assez Facile" },
+            { id: 19, code: `resultat = 7 < 12
+print(resultat)`, question: "Quelle est la sortie de ce code ?", options: ["False", "True", "7", "12"], correct: 1, points: 1.25, difficulty: "Assez Facile" },
+            { id: 20, code: `message = "Bonjour ISI"
+print(len(message))`, question: "Quelle est la sortie de ce code ?", options: ["10", "11", "12", "9"], correct: 1, points: 1.25, difficulty: "Assez Facile" },
+            { id: 21, code: `nombres = [2, 4, 6, 8, 10]
+print(nombres[1:4])`, question: "Quelle est la sortie de ce code ?", options: ["[2, 4, 6]", "[4, 6, 8]", "[4, 6, 8, 10]", "[2, 4, 6, 8]"], correct: 1, points: 1.5, difficulty: "Moyen" },
+            { id: 22, code: `texte = "je suis ingenieur"
+mots = texte.split()
+print(len(mots))`, question: "Quelle est la sortie de ce code ?", options: ["1", "3", "18", "4"], correct: 1, points: 1.5, difficulty: "Moyen" },
+            { id: 23, code: `base = 3
+exposant = 4
+print(base ** exposant)`, question: "Quelle est la sortie de ce code ?", options: ["12", "7", "81", "64"], correct: 2, points: 1.5, difficulty: "Moyen" },
+            { id: 24, code: `for num in range(6):
+    if num == 3:
+        continue
+    print(num, end="")`, question: "Quelle est la sortie de ce code ?", options: ["012345", "01245", "12345", "0123"], correct: 1, points: 1.5, difficulty: "Moyen" },
+            { id: 25, code: `animaux = ["chat", "chien"]
+animaux.insert(1, "oiseau")
+print(animaux)`, question: "Quelle est la sortie de ce code ?", options: ["['chat', 'oiseau', 'chien']", "['oiseau', 'chat', 'chien']", "['chat', 'chien', 'oiseau']", "Erreur"], correct: 0, points: 1.5, difficulty: "Moyen" },
+            { id: 26, code: `x = 15
+if x > 10 and x < 20:
+    print("OK")
+else:
+    print("NON")`, question: "Quelle est la sortie de ce code ?", options: ["OK", "NON", "15", "True"], correct: 0, points: 1.5, difficulty: "Moyen" },
+            { id: 27, code: `mot = "CODE"
+print(mot * 3)`, question: "Quelle est la sortie de ce code ?", options: ["CODE CODE CODE", "CODECODECODE", "CODE3", "Erreur"], correct: 1, points: 1.5, difficulty: "Moyen" },
+            { id: 28, code: `valeurs = [5, 10, 15]
+valeurs.reverse()
+print(valeurs)`, question: "Quelle est la sortie de ce code ?", options: ["[5, 10, 15]", "[15, 10, 5]", "None", "[10, 15, 5]"], correct: 1, points: 1.5, difficulty: "Moyen" },
+            { id: 29, code: `def multiplier(a, b):
+    return a * b
+print(multiplier(4, 7))`, question: "Quelle est la sortie de ce code ?", options: ["11", "28", "47", "None"], correct: 1, points: 1.5, difficulty: "Moyen" },
+            { id: 30, code: `n = 9
+type_nombre = "Pair" if n % 2 == 0 else "Impair"
+print(type_nombre)`, question: "Quelle est la sortie de ce code ?", options: ["Pair", "Impair", "9", "True"], correct: 1, points: 1.5, difficulty: "Moyen" },
+            { id: 31, code: `L1 = [1, 2]
+L1.extend([3, 4, 5])
+print(len(L1))`, question: "Quelle est la sortie de ce code ?", options: ["2", "3", "5", "4"], correct: 2, points: 1.75, difficulty: "Assez Difficile" },
+            { id: 32, code: `chaine = "127"
+resultat = int(chaine) + 13
+print(resultat)`, question: "Quelle est la sortie de ce code ?", options: ["12713", "140", "127", "Erreur"], correct: 1, points: 1.75, difficulty: "Assez Difficile" },
+            { id: 33, code: `total = 0
+for i in range(1, 5):
+    total += i
+print(total)`, question: "Quelle est la sortie de ce code ?", options: ["5", "10", "15", "0"], correct: 1, points: 1.75, difficulty: "Assez Difficile" },
+            { id: 34, code: `donnees = "nom,prenom,age"
+liste = donnees.split(',')
+print(len(liste))`, question: "Quelle est la sortie de ce code ?", options: ["1", "2", "3", "15"], correct: 2, points: 1.75, difficulty: "Assez Difficile" },
+            { id: 35, code: `x = 15
+while x > 8:
+    x -= 3
+    if x == 9:
+        break
+print(x)`, question: "Quelle est la sortie de ce code ?", options: ["6", "9", "12", "8"], correct: 1, points: 1.75, difficulty: "Assez Difficile" },
+            { id: 36, code: `def verifier(valeur):
+    if valeur > 100:
+        return "Grand"
+    return "Petit"
+print(verifier(50))`, question: "Quelle est la sortie de ce code ?", options: ["Grand", "Petit", "50", "None"], correct: 1, points: 1.75, difficulty: "Assez Difficile" },
+            { id: 37, code: `mots = ["Bon", "jour"]
+phrase = "-".join(mots)
+print(phrase)`, question: "Quelle est la sortie de ce code ?", options: ["Bonjour", "Bon-jour", "Bon jour", "['Bon', 'jour']"], correct: 1, points: 1.75, difficulty: "Assez Difficile" },
+            { id: 38, code: `texte = "Python3"
+nouveau = texte.replace("3", "2024")
+print(nouveau)`, question: "Quelle est la sortie de ce code ?", options: ["Python3", "Python2024", "Python", "Erreur"], correct: 1, points: 1.75, difficulty: "Assez Difficile" },
+            { id: 39, code: `valeurs = [12, 7, 25, 3, 18]
+print(max(valeurs) - min(valeurs))`, question: "Quelle est la sortie de ce code ?", options: ["15", "22", "25", "28"], correct: 1, points: 1.75, difficulty: "Assez Difficile" },
+            { id: 40, code: `a = 10
+b = 20
+a, b = b, a
+print(a, b)`, question: "Quelle est la sortie de ce code ?", options: ["10 20", "20 10", "30 30", "Erreur"], correct: 1, points: 1.75, difficulty: "Assez Difficile" },
+            { id: 41, code: `mot = "PYTHON"
+print(mot[::-1])`, question: "Quelle est la sortie de ce code ?", options: ["PYTHON", "NOHTYP", "PYTH", "THON"], correct: 1, points: 2, difficulty: "Très Difficile" },
+            { id: 42, code: `def somme_recursif(n):
+    if n <= 0:
+        return 0
+    return n + somme_recursif(n - 1)
+print(somme_recursif(5))`, question: "Quelle est la sortie de ce code ?", options: ["5", "10", "15", "Erreur"], correct: 2, points: 2, difficulty: "Très Difficile" },
+            { id: 43, code: `liste = [1, 2, 3, 4, 5, 6]
+resultat = [x for x in liste if x % 2 == 1]
+print(resultat)`, question: "Quelle est la sortie de ce code ?", options: ["[2, 4, 6]", "[1, 3, 5]", "[1, 2, 3, 4, 5, 6]", "[]"], correct: 1, points: 2, difficulty: "Très Difficile" },
+            { id: 44, code: `liste1 = [1, 2, 3]
+liste2 = liste1
+liste2.append(4)
+print(liste1)`, question: "Quelle est la sortie ? (Piège!)", options: ["[1, 2, 3]", "[1, 2, 3, 4]", "[4]", "Erreur"], correct: 1, points: 2, difficulty: "Très Difficile" },
+            { id: 45, code: `def calcul(a, b=10, c=5):
+    return a + b - c
+print(calcul(5, c=2))`, question: "Quelle est la sortie de ce code ?", options: ["12", "13", "17", "Erreur"], correct: 1, points: 2, difficulty: "Très Difficile" },
+            { id: 46, code: `M = [[1, 2, 3], [4, 5, 6]]
+print(M[1][2])`, question: "Quelle est la sortie de ce code ?", options: ["3", "5", "6", "2"], correct: 2, points: 2, difficulty: "Très Difficile" },
+            { id: 47, code: `compte = 0
+for i in range(1, 11):
+    if i % 2 == 0:
+        compte += 1
+print(compte)`, question: "Quelle est la sortie de ce code ?", options: ["4", "5", "6", "10"], correct: 1, points: 2, difficulty: "Très Difficile" },
+            { id: 48, code: `def ajouter(liste):
+    liste.append(999)
 
-          {/* Modal Détails */}
-          {selectedStudent && (
-            <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50" onClick={() => {setSelectedStudent(null); setShowDetailedAnswers(false);}}>
-              <div className="bg-white rounded-xl max-w-4xl w-full max-h-[90vh] overflow-y-auto p-6" onClick={(e) => e.stopPropagation()}>
-                <div className="flex justify-between items-center mb-6">
-                  <h2 className="text-2xl font-bold text-gray-800">Détails de l'étudiant</h2>
-                  <button onClick={() => {setSelectedStudent(null); setShowDetailedAnswers(false);}} className="text-gray-400 hover:text-gray-600">
-                    <i className="fas fa-times text-2xl"></i>
-                  </button>
-                </div>
+ma_liste = [1, 2, 3]
+ajouter(ma_liste)
+print(len(ma_liste))`, question: "Quelle est la sortie de ce code ?", options: ["3", "4", "999", "Erreur"], correct: 1, points: 2, difficulty: "Très Difficile" },
+            { id: 49, code: `notes = [12, 15, 18, 14, 16]
+moyenne = sum(notes) / len(notes)
+print(round(moyenne, 1))`, question: "Quelle est la sortie de ce code ?", options: ["14.0", "15.0", "15.5", "14.5"], correct: 1, points: 2, difficulty: "Très Difficile" },
+            { id: 50, code: `data = [8, 3, 5, 1, 9]
+triee = sorted(data)
+mediane = triee[len(triee)//2]
+print(mediane)`, question: "Quelle est la sortie de ce code ?", options: ["3", "5", "8", "9"], correct: 1, points: 2, difficulty: "Très Difficile" }
+          ]
+        };
 
-                <div className="grid md:grid-cols-2 gap-6 mb-6">
-                  <div className="bg-blue-50 p-4 rounded-lg">
-                    <p className="text-sm text-gray-600">Nom complet</p>
-                    <p className="text-xl font-bold text-gray-800">{selectedStudent.prenom} {selectedStudent.nom}</p>
+        function AdminDashboard() {
+          const [isAuthenticated, setIsAuthenticated] = useState(() => {
+            return localStorage.getItem('adminAuthenticated') === 'true';
+          });
+          const [loginInput, setLoginInput] = useState('');
+          const [passwordInput, setPasswordInput] = useState('');
+          const [results, setResults] = useState([]);
+          const [activeSessions, setActiveSessions] = useState([]);
+          const [selectedStudent, setSelectedStudent] = useState(null);
+          const [filter, setFilter] = useState('all');
+          const [classFilter, setClassFilter] = useState('all');
+          const [loading, setLoading] = useState(false);
+          const [showSessions, setShowSessions] = useState(false);
+          const [showDetailedAnswers, setShowDetailedAnswers] = useState(false);
+
+          // ðŸ”¥ Ã‰COUTER LES RÃ‰SULTATS FINAUX
+          useEffect(() => {
+            if (isAuthenticated) {
+              setLoading(true);
+              const unsubscribe = db.collection('results')
+                .orderBy('timestamp', 'desc')
+                .onSnapshot((snapshot) => {
+                  const resultsData = snapshot.docs.map(doc => ({
+                    id: doc.id,
+                    ...doc.data()
+                  }));
+                  setResults(resultsData);
+                  setLoading(false);
+                }, (error) => {
+                  console.error('Erreur Firebase:', error);
+                  setLoading(false);
+                });
+
+              return () => unsubscribe();
+            }
+          }, [isAuthenticated]);
+
+          // ðŸ”¥ Ã‰COUTER LES SESSIONS ACTIVES EN TEMPS RÃ‰EL
+          useEffect(() => {
+            if (isAuthenticated) {
+              const unsubscribe = db.collection('quiz_sessions')
+                .where('status', 'in', ['started'])
+                .onSnapshot((snapshot) => {
+                  const sessionsData = [];
+                  
+                  snapshot.docChanges().forEach((change) => {
+                    const session = { id: change.doc.id, ...change.doc.data() };
+                    
+                    if (change.type === 'added') {
+                      // ðŸŽ“ NOUVEAU QUIZ COMMENCÃ‰
+                      const Toast = Swal.mixin({
+                        toast: true,
+                        position: 'top-end',
+                        showConfirmButton: false,
+                        timer: 5000,
+                        timerProgressBar: true
+                      });
+                      
+                      Toast.fire({
+                        icon: 'info',
+                        title: 'ðŸŽ“ Quiz commencÃ©',
+                        html: `<strong>${session.etudiant}</strong><br/>${session.classe}`
+                      });
+                    }
+                    
+                    if (change.type === 'modified') {
+                      // ðŸš¨ CHANGEMENT D'ONGLET DÃ‰TECTÃ‰
+                      if (session.tabSwitches > 0 && session.lastWarning) {
+                        const Toast = Swal.mixin({
+                          toast: true,
+                          position: 'top-end',
+                          showConfirmButton: false,
+                          timer: 8000,
+                          timerProgressBar: true
+                        });
+                        
+                        Toast.fire({
+                          icon: 'warning',
+                          title: 'âš ï¸ TRICHE DÃ‰TECTÃ‰E',
+                          html: `
+                            <div class="text-left">
+                              <p><strong>${session.etudiant}</strong></p>
+                              <p class="text-sm">${session.classe}</p>
+                              <p class="text-red-600 font-bold mt-2">${session.tabSwitches} changement(s) d'onglet</p>
+                              <p class="text-xs text-gray-600 mt-1">${session.lastWarning}</p>
+                            </div>
+                          `
+                        });
+                      }
+                    }
+                  });
+
+                  // Mettre Ã  jour la liste des sessions actives
+                  const currentSessions = snapshot.docs.map(doc => ({
+                    id: doc.id,
+                    ...doc.data()
+                  }));
+                  setActiveSessions(currentSessions);
+                }, (error) => {
+                  console.error('Erreur sessions:', error);
+                });
+
+              return () => unsubscribe();
+            }
+          }, [isAuthenticated]);
+
+          const handleLogin = () => {
+            if (loginInput === ADMIN_CREDENTIALS.login && passwordInput === ADMIN_CREDENTIALS.password) {
+              setIsAuthenticated(true);
+              localStorage.setItem('adminAuthenticated', 'true');
+              setLoginInput('');
+              setPasswordInput('');
+              
+              const Toast = Swal.mixin({
+                toast: true,
+                position: 'top-end',
+                showConfirmButton: false,
+                timer: 3000,
+                timerProgressBar: true
+              });
+              
+              Toast.fire({
+                icon: 'success',
+                title: 'Connexion rÃ©ussie !',
+                text: 'Surveillance en temps rÃ©el activÃ©e'
+              });
+            } else {
+              Swal.fire({
+                icon: 'error',
+                title: 'Ã‰chec de connexion',
+                text: 'Identifiant ou mot de passe incorrect.',
+                confirmButtonColor: '#DC2626'
+              });
+            }
+          };
+
+          const handleLogout = async () => {
+            const result = await Swal.fire({
+              icon: 'question',
+              title: 'DÃ©connexion',
+              text: 'Voulez-vous vraiment vous dÃ©connecter ?',
+              showCancelButton: true,
+              confirmButtonColor: '#DC2626',
+              cancelButtonColor: '#6B7280',
+              confirmButtonText: 'Oui, dÃ©connecter',
+              cancelButtonText: 'Annuler'
+            });
+
+            if (result.isConfirmed) {
+              setIsAuthenticated(false);
+              localStorage.removeItem('adminAuthenticated');
+              setSelectedStudent(null);
+              
+              const Toast = Swal.mixin({
+                toast: true,
+                position: 'top-end',
+                showConfirmButton: false,
+                timer: 2000,
+                timerProgressBar: true
+              });
+              
+              Toast.fire({
+                icon: 'info',
+                title: 'DÃ©connectÃ© avec succÃ¨s'
+              });
+            }
+          };
+
+          const clearAllResults = async () => {
+            const result = await Swal.fire({
+              icon: 'warning',
+              title: 'ÃŠtes-vous sÃ»r ?',
+              html: '<p>Supprimer <strong>TOUS</strong> les rÃ©sultats ?</p><p class="text-red-600 font-semibold mt-2">Action IRRÃ‰VERSIBLE !</p>',
+              showCancelButton: true,
+              confirmButtonColor: '#DC2626',
+              cancelButtonColor: '#6B7280',
+              confirmButtonText: 'Oui, tout supprimer',
+              cancelButtonText: 'Annuler'
+            });
+
+            if (result.isConfirmed) {
+              try {
+                const batch = db.batch();
+                const snapshot = await db.collection('results').get();
+                snapshot.docs.forEach(doc => {
+                  batch.delete(doc.ref);
+                });
+                await batch.commit();
+                
+                setSelectedStudent(null);
+                
+                Swal.fire({
+                  icon: 'success',
+                  title: 'SupprimÃ© !',
+                  text: 'Tous les rÃ©sultats ont Ã©tÃ© supprimÃ©s.',
+                  confirmButtonColor: '#10B981'
+                });
+              } catch (error) {
+                Swal.fire({
+                  icon: 'error',
+                  title: 'Erreur',
+                  text: 'Impossible de supprimer les rÃ©sultats.',
+                  confirmButtonColor: '#DC2626'
+                });
+              }
+            }
+          };
+
+          const exportToCSV = () => {
+            if (results.length === 0) {
+              Swal.fire({
+                icon: 'info',
+                title: 'Aucun rÃ©sultat',
+                text: 'Il n\'y a aucun rÃ©sultat Ã  exporter.',
+                confirmButtonColor: '#4F46E5'
+              });
+              return;
+            }
+
+            const csv = [
+              ['Nom Complet', 'Classe', 'Note/20', 'Pourcentage', 'Bonnes RÃ©ponses', 'Total Questions', 'Points Obtenus', 'Points Max', 'Tentatives Triche', 'PÃ©nalitÃ©', 'Date', 'DurÃ©e'],
+              ...results.map(r => [
+                r.etudiant,
+                r.classe,
+                r.note,
+                r.pourcentage + '%',
+                r.correct,
+                r.total,
+                r.points,
+                r.maxPoints,
+                r.tentativesTriche,
+                r.penalite,
+                r.dateTest,
+                r.duree
+              ])
+            ].map(row => row.join(',')).join('\n');
+
+            const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = `resultats_quiz_${new Date().toISOString().split('T')[0]}.csv`;
+            link.click();
+
+            const Toast = Swal.mixin({
+              toast: true,
+              position: 'top-end',
+              showConfirmButton: false,
+              timer: 3000,
+              timerProgressBar: true
+            });
+            
+            Toast.fire({
+              icon: 'success',
+              title: `${results.length} rÃ©sultat(s) exportÃ©(s) !`
+            });
+          };
+
+          const exportDetailedReport = (student) => {
+            const report = `
+==============================================
+RAPPORT DÃ‰TAILLÃ‰ - QUIZ PYTHON
+==============================================
+
+INFORMATIONS Ã‰TUDIANT
+------------------------------
+Nom complet : ${student.etudiant}
+Classe : ${student.classe}
+Date du test : ${student.dateTest}
+DurÃ©e du test : ${student.duree}
+
+RÃ‰SULTATS
+------------------------------
+Note finale : ${student.note}/20
+Pourcentage de rÃ©ussite : ${student.pourcentage}%
+RÃ©ponses correctes : ${student.correct}/${student.total}
+Points obtenus : ${student.points}/${student.maxPoints}
+
+SYSTÃˆME ANTI-TRICHE
+------------------------------
+Tentatives dÃ©tectÃ©es : ${student.tentativesTriche}
+PÃ©nalitÃ© appliquÃ©e : -${student.penalite} points
+
+${student.tentativesTriche > 0 ? `AVERTISSEMENTS ENREGISTRÃ‰S :
+${student.avertissements.map((w, i) => `${i + 1}. ${w}`).join('\n')}` : 'Aucun avertissement - Test effectuÃ© correctement'}
+
+DÃ‰TAIL DES RÃ‰PONSES
+------------------------------
+${student.detailsReponses ? student.detailsReponses.map((d) => 
+  `Question ${d.question} (${d.difficulte}) : ${d.estCorrecte ? 'âœ… CORRECT' : 'âŒ INCORRECT'} - ${d.points} pts`
+).join('\n') : 'DÃ©tails non disponibles'}
+
+==============================================
+Rapport gÃ©nÃ©rÃ© le ${new Date().toLocaleString('fr-FR')}
+==============================================
+            `.trim();
+
+            const blob = new Blob([report], { type: 'text/plain;charset=utf-8;' });
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = `rapport_${student.etudiant.replace(/\s/g, '_')}_${new Date().toISOString().split('T')[0]}.txt`;
+            link.click();
+
+            const Toast = Swal.mixin({
+              toast: true,
+              position: 'top-end',
+              showConfirmButton: false,
+              timer: 3000,
+              timerProgressBar: true
+            });
+            
+            Toast.fire({
+              icon: 'success',
+              title: 'Rapport tÃ©lÃ©chargÃ© !'
+            });
+          };
+
+          const getStatistics = () => {
+            if (results.length === 0) return null;
+
+            const notes = results.map(r => parseFloat(r.note));
+            const moyenne = (notes.reduce((a, b) => a + b, 0) / notes.length).toFixed(2);
+            const noteMax = Math.max(...notes).toFixed(2);
+            const noteMin = Math.min(...notes).toFixed(2);
+            const tauxReussite = ((results.filter(r => parseFloat(r.note) >= 10).length / results.length) * 100).toFixed(2);
+            const totalTriche = results.reduce((sum, r) => sum + r.tentativesTriche, 0);
+
+            return {
+              total: results.length,
+              moyenne,
+              noteMax,
+              noteMin,
+              tauxReussite,
+              totalTriche,
+              totalIAGE: results.filter(r => r.classe === 'L2-IAGE').length,
+              totalGL: results.filter(r => r.classe === 'L2-GL').length
+            };
+          };
+
+          const filterResults = () => {
+            let filtered = results;
+            
+            if (filter === 'passed') filtered = filtered.filter(r => parseFloat(r.note) >= 10);
+            else if (filter === 'failed') filtered = filtered.filter(r => parseFloat(r.note) < 10);
+            else if (filter === 'cheating') filtered = filtered.filter(r => r.tentativesTriche > 0);
+            
+            if (classFilter !== 'all') {
+              filtered = filtered.filter(r => r.classe === classFilter);
+            }
+            
+            return filtered;
+          };
+
+          if (!isAuthenticated) {
+            return (
+              <div className="min-h-screen bg-gradient-to-br from-gray-900 to-indigo-900 flex items-center justify-center p-4">
+                <div className="bg-white rounded-2xl shadow-2xl p-6 sm:p-8 max-w-md w-full">
+                  <div className="text-center mb-8">
+                    <svg className="w-12 h-12 sm:w-16 sm:h-16 text-indigo-600 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                    </svg>
+                    <h1 className="text-2xl sm:text-3xl font-bold text-gray-800 mb-2">Administration</h1>
+                    <p className="text-sm sm:text-base text-gray-600">Tableau de bord - Quiz Python</p>
                   </div>
-                  <div className="bg-purple-50 p-4 rounded-lg">
-                    <p className="text-sm text-gray-600">Classe</p>
-                    <p className="text-xl font-bold text-gray-800">{selectedStudent.classe}</p>
-                  </div>
-                  <div className="bg-green-50 p-4 rounded-lg">
-                    <p className="text-sm text-gray-600">Score</p>
-                    <p className="text-xl font-bold text-gray-800">{selectedStudent.score.toFixed(2)} / {selectedStudent.scoreMax}</p>
-                  </div>
-                  <div className="bg-yellow-50 p-4 rounded-lg">
-                    <p className="text-sm text-gray-600">Pourcentage</p>
-                    <p className="text-xl font-bold text-gray-800">{selectedStudent.pourcentage}%</p>
-                  </div>
-                </div>
 
-                <div className="flex flex-col sm:flex-row gap-3 mb-6">
-                  <button onClick={() => setShowDetailedAnswers(!showDetailedAnswers)} className="flex-1 flex items-center justify-center gap-2 px-4 py-3 bg-purple-600 text-white rounded-lg hover:bg-purple-700">
-                    <i className={`fas fa-eye${showDetailedAnswers ? '-slash' : ''}`}></i>
-                    {showDetailedAnswers ? 'Masquer' : 'Voir'} les détails
-                  </button>
-                  <button onClick={() => {setSelectedStudent(null); setShowDetailedAnswers(false);}} className="px-4 py-3 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300">
-                    Fermer
-                  </button>
-                </div>
-
-                {/* Détails des réponses */}
-                {showDetailedAnswers && selectedStudent.detailsReponses && (
                   <div className="space-y-4">
-                    {/* Réponses correctes */}
-                    {(() => {
-                      const correctQuestions = selectedStudent.detailsReponses.filter(d => d.estCorrecte);
-                      if (correctQuestions.length === 0) return null;
-                      return (
-                        <div className="bg-green-50 rounded-lg p-4 border-2 border-green-200">
-                          <h3 className="text-lg font-bold text-green-600 mb-4 flex items-center gap-2">
-                            <i className="fas fa-check-circle"></i>
-                            Réponses Correctes ({correctQuestions.length})
-                          </h3>
-                          <div className="space-y-3">
-                            {correctQuestions.map((detail) => {
-                              const q = QUIZ_CONFIG.questions.find(question => question.id === detail.question);
-                              if (!q) return null;
-                              return (
-                                <div key={detail.question} className="bg-white border-l-4 border-green-500 p-3 rounded">
-                                  <div className="flex justify-between items-start mb-2">
-                                    <p className="font-semibold text-gray-800 text-sm">Question {q.id}</p>
-                                    <span className="text-xs bg-green-600 text-white px-2 py-1 rounded">{q.points} pts</span>
-                                  </div>
-                                  <p className="text-xs text-gray-700 mb-2">{q.question}</p>
-                                  <div className="code-block mb-2">
-                                    <pre>{q.code}</pre>
-                                  </div>
-                                  <div className="flex items-center gap-2 text-green-700 text-sm">
-                                    <i className="fas fa-check"></i>
-                                    <span className="font-semibold">{q.options[q.correct]}</span>
-                                  </div>
-                                </div>
-                              );
-                            })}
-                          </div>
-                        </div>
-                      );
-                    })()}
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">Identifiant</label>
+                      <input
+                        type="text"
+                        value={loginInput}
+                        onChange={(e) => setLoginInput(e.target.value)}
+                        onKeyPress={(e) => e.key === 'Enter' && handleLogin()}
+                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                        placeholder="Votre identifiant"
+                      />
+                    </div>
 
-                    {/* Réponses incorrectes */}
-                    {(() => {
-                      const incorrectQuestions = selectedStudent.detailsReponses.filter(d => !d.estCorrecte && d.reponse !== -1);
-                      if (incorrectQuestions.length === 0) return null;
-                      return (
-                        <div className="bg-red-50 rounded-lg p-4 border-2 border-red-200">
-                          <h3 className="text-lg font-bold text-red-600 mb-4 flex items-center gap-2">
-                            <i className="fas fa-times-circle"></i>
-                            Réponses Incorrectes ({incorrectQuestions.length})
-                          </h3>
-                          <div className="space-y-3">
-                            {incorrectQuestions.map((detail) => {
-                              const q = QUIZ_CONFIG.questions.find(question => question.id === detail.question);
-                              if (!q) return null;
-                              return (
-                                <div key={detail.question} className="bg-white border-l-4 border-red-500 p-3 rounded">
-                                  <div className="flex justify-between items-start mb-2">
-                                    <p className="font-semibold text-gray-800 text-sm">Question {q.id}</p>
-                                    <span className="text-xs bg-red-600 text-white px-2 py-1 rounded">0 / {q.points} pts</span>
-                                  </div>
-                                  <p className="text-xs text-gray-700 mb-2">{q.question}</p>
-                                  <div className="code-block mb-2">
-                                    <pre>{q.code}</pre>
-                                  </div>
-                                  <div className="space-y-2">
-                                    <div className="flex items-center gap-2 text-red-700 text-sm">
-                                      <i className="fas fa-times"></i>
-                                      <div>
-                                        <span className="font-semibold">Réponse donnée : </span>
-                                        <span>{q.options[detail.reponse]}</span>
-                                      </div>
-                                    </div>
-                                    <div className="flex items-center gap-2 text-green-700 text-sm">
-                                      <i className="fas fa-check"></i>
-                                      <div>
-                                        <span className="font-semibold">Bonne réponse : </span>
-                                        <span>{q.options[q.correct]}</span>
-                                      </div>
-                                    </div>
-                                  </div>
-                                </div>
-                              );
-                            })}
-                          </div>
-                        </div>
-                      );
-                    })()}
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">Mot de passe</label>
+                      <input
+                        type="password"
+                        value={passwordInput}
+                        onChange={(e) => setPasswordInput(e.target.value)}
+                        onKeyPress={(e) => e.key === 'Enter' && handleLogin()}
+                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                        placeholder="Votre mot de passe"
+                      />
+                    </div>
 
-                    {/* Questions non répondues */}
-                    {(() => {
-                      const unansweredQuestions = selectedStudent.detailsReponses.filter(d => d.reponse === -1);
-                      if (unansweredQuestions.length === 0) return null;
-                      return (
-                        <div className="bg-gray-50 rounded-lg p-4 border-2 border-gray-300">
-                          <h3 className="text-lg font-bold text-gray-600 mb-4 flex items-center gap-2">
-                            <i className="fas fa-question-circle"></i>
-                            Questions Non Répondues ({unansweredQuestions.length})
-                          </h3>
-                          <div className="space-y-3">
-                            {unansweredQuestions.map((detail) => {
-                              const q = QUIZ_CONFIG.questions.find(question => question.id === detail.question);
-                              if (!q) return null;
+                    <button
+                      onClick={handleLogin}
+                      className="w-full bg-indigo-600 text-white py-3 rounded-lg font-semibold hover:bg-indigo-700 transition-colors shadow-lg"
+                    >
+                      Se connecter
+                    </button>
+                  </div>
+                </div>
+              </div>
+            );
+          }
+
+          const stats = getStatistics();
+          const filteredResults = filterResults();
+
+          return (
+            <div className="min-h-screen bg-gray-50 p-3 sm:p-6">
+              <div className="max-w-7xl mx-auto">
+                {/* Header */}
+                <div className="bg-white rounded-lg shadow-md p-4 sm:p-6 mb-4 sm:mb-6">
+                  <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                    <div>
+                      <h1 className="text-2xl sm:text-3xl font-bold text-gray-800">Tableau de Bord Admin</h1>
+                      <p className="text-sm sm:text-base text-gray-600 flex items-center gap-2">
+                        Quiz Python - L2 
+                        {loading && <span className="text-green-600 text-xs">ðŸ”„ Synchro...</span>}
+                      </p>
+                    </div>
+                    <div className="flex gap-2 w-full sm:w-auto">
+                      <button
+                        onClick={() => setShowSessions(!showSessions)}
+                        className="flex-1 sm:flex-none relative px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm sm:text-base"
+                      >
+                        {activeSessions.length > 0 && (
+                          <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full w-6 h-6 flex items-center justify-center animate-pulse-ring">
+                            {activeSessions.length}
+                          </span>
+                        )}
+                        ðŸŽ“ En cours
+                      </button>
+                      <button
+                        onClick={handleLogout}
+                        className="flex-1 sm:flex-none px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors text-sm sm:text-base"
+                      >
+                        DÃ©connexion
+                      </button>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Sessions actives */}
+                {showSessions && activeSessions.length > 0 && (
+                  <div className="bg-white rounded-lg shadow-md p-4 sm:p-6 mb-4 sm:mb-6">
+                    <h2 className="text-lg sm:text-xl font-bold text-gray-800 mb-4 flex items-center">
+                      <span className="w-3 h-3 bg-green-500 rounded-full animate-pulse mr-2"></span>
+                      Quiz en cours ({activeSessions.length})
+                    </h2>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
+                      {activeSessions.map(session => (
+                        <div key={session.id} className="border-2 border-green-500 rounded-lg p-3 sm:p-4 bg-green-50">
+                          <p className="font-bold text-gray-800 text-sm sm:text-base">{session.etudiant}</p>
+                          <p className="text-xs sm:text-sm text-gray-600">{session.classe}</p>
+                          <div className="mt-2 flex items-center justify-between text-xs">
+                            <span className="text-gray-600">
+                              Question {session.currentQuestion || 0}/50
+                            </span>
+                            {session.tabSwitches > 0 && (
+                              <span className="text-red-600 font-bold">
+                                âš ï¸ {session.tabSwitches}
+                              </span>
+                            )}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Statistiques */}
+                {stats && (
+                  <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mb-4 sm:mb-6">
+                    <div className="bg-white p-3 sm:p-4 rounded-lg shadow">
+                      <p className="text-xs sm:text-sm text-gray-600">Total</p>
+                      <p className="text-xl sm:text-2xl font-bold text-indigo-600">{stats.total}</p>
+                    </div>
+                    <div className="bg-white p-3 sm:p-4 rounded-lg shadow">
+                      <p className="text-xs sm:text-sm text-gray-600">L2-IAGE</p>
+                      <p className="text-xl sm:text-2xl font-bold text-blue-600">{stats.totalIAGE}</p>
+                    </div>
+                    <div className="bg-white p-3 sm:p-4 rounded-lg shadow">
+                      <p className="text-xs sm:text-sm text-gray-600">L2-GL</p>
+                      <p className="text-xl sm:text-2xl font-bold text-teal-600">{stats.totalGL}</p>
+                    </div>
+                    <div className="bg-white p-3 sm:p-4 rounded-lg shadow">
+                      <p className="text-xs sm:text-sm text-gray-600">Moyenne</p>
+                      <p className="text-xl sm:text-2xl font-bold text-purple-600">{stats.moyenne}/20</p>
+                    </div>
+                    <div className="bg-white p-3 sm:p-4 rounded-lg shadow">
+                      <p className="text-xs sm:text-sm text-gray-600">Note max</p>
+                      <p className="text-xl sm:text-2xl font-bold text-green-600">{stats.noteMax}/20</p>
+                    </div>
+                    <div className="bg-white p-3 sm:p-4 rounded-lg shadow">
+                      <p className="text-xs sm:text-sm text-gray-600">Note min</p>
+                      <p className="text-xl sm:text-2xl font-bold text-orange-600">{stats.noteMin}/20</p>
+                    </div>
+                    <div className="bg-white p-3 sm:p-4 rounded-lg shadow">
+                      <p className="text-xs sm:text-sm text-gray-600">RÃ©ussite</p>
+                      <p className="text-xl sm:text-2xl font-bold text-emerald-600">{stats.tauxReussite}%</p>
+                    </div>
+                    <div className="bg-white p-3 sm:p-4 rounded-lg shadow">
+                      <p className="text-xs sm:text-sm text-gray-600">Triches</p>
+                      <p className="text-xl sm:text-2xl font-bold text-red-600">{stats.totalTriche}</p>
+                    </div>
+                  </div>
+                )}
+
+                {/* Filtres */}
+                <div className="bg-white rounded-lg shadow-md p-4 sm:p-6 mb-4 sm:mb-6">
+                  <div className="space-y-4">
+                    <div>
+                      <h3 className="text-sm font-semibold text-gray-700 mb-3">Filtrer par statut :</h3>
+                      <div className="flex flex-wrap gap-2">
+                        <button onClick={() => setFilter('all')} className={`px-3 sm:px-4 py-2 rounded-lg font-medium transition-colors text-xs sm:text-sm ${filter === 'all' ? 'bg-indigo-600 text-white' : 'bg-gray-200 text-gray-700'}`}>
+                          Tous ({results.length})
+                        </button>
+                        <button onClick={() => setFilter('passed')} className={`px-3 sm:px-4 py-2 rounded-lg font-medium transition-colors text-xs sm:text-sm ${filter === 'passed' ? 'bg-green-600 text-white' : 'bg-gray-200 text-gray-700'}`}>
+                          Admis ({results.filter(r => parseFloat(r.note) >= 10).length})
+                        </button>
+                        <button onClick={() => setFilter('failed')} className={`px-3 sm:px-4 py-2 rounded-lg font-medium transition-colors text-xs sm:text-sm ${filter === 'failed' ? 'bg-red-600 text-white' : 'bg-gray-200 text-gray-700'}`}>
+                          Ã‰chec ({results.filter(r => parseFloat(r.note) < 10).length})
+                        </button>
+                        <button onClick={() => setFilter('cheating')} className={`px-3 sm:px-4 py-2 rounded-lg font-medium transition-colors text-xs sm:text-sm ${filter === 'cheating' ? 'bg-orange-600 text-white' : 'bg-gray-200 text-gray-700'}`}>
+                          Triche ({results.filter(r => r.tentativesTriche > 0).length})
+                        </button>
+                      </div>
+                    </div>
+
+                    <div>
+                      <h3 className="text-sm font-semibold text-gray-700 mb-3">Filtrer par classe :</h3>
+                      <div className="flex flex-wrap gap-2">
+                        <button onClick={() => setClassFilter('all')} className={`px-3 sm:px-4 py-2 rounded-lg font-medium transition-colors text-xs sm:text-sm ${classFilter === 'all' ? 'bg-purple-600 text-white' : 'bg-gray-200 text-gray-700'}`}>
+                          Toutes ({results.length})
+                        </button>
+                        <button onClick={() => setClassFilter('L2-IAGE')} className={`px-3 sm:px-4 py-2 rounded-lg font-medium transition-colors text-xs sm:text-sm ${classFilter === 'L2-IAGE' ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-700'}`}>
+                          L2-IAGE ({results.filter(r => r.classe === 'L2-IAGE').length})
+                        </button>
+                        <button onClick={() => setClassFilter('L2-GL')} className={`px-3 sm:px-4 py-2 rounded-lg font-medium transition-colors text-xs sm:text-sm ${classFilter === 'L2-GL' ? 'bg-teal-600 text-white' : 'bg-gray-200 text-gray-700'}`}>
+                          L2-GL ({results.filter(r => r.classe === 'L2-GL').length})
+                        </button>
+                      </div>
+                    </div>
+
+                    <div className="flex flex-col sm:flex-row justify-end gap-2 pt-2 border-t">
+                      <button onClick={exportToCSV} className="flex items-center justify-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 text-sm">
+                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                        </svg>
+                        Exporter CSV
+                      </button>
+                      <button onClick={clearAllResults} className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 text-sm">
+                        Effacer tout
+                      </button>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Liste des rÃ©sultats - Version mobile simplifiÃ©e */}
+                {filteredResults.length === 0 ? (
+                  <div className="bg-white rounded-lg shadow-md p-8 sm:p-12 text-center">
+                    <p className="text-lg sm:text-xl text-gray-600">Aucun rÃ©sultat</p>
+                    <p className="text-sm sm:text-base text-gray-500 mt-2">Les rÃ©sultats apparaÃ®tront ici en temps rÃ©el</p>
+                  </div>
+                ) : (
+                  <div className="bg-white rounded-lg shadow-md overflow-hidden">
+                    {/* Vue mobile */}
+                    <div className="block sm:hidden">
+                      {filteredResults.map((result, index) => (
+                        <div key={result.id || index} className="border-b p-4">
+                          <div className="flex justify-between items-start mb-2">
+                            <div>
+                              <p className="font-bold text-gray-800">{result.etudiant}</p>
+                              <p className="text-sm text-gray-600">{result.classe}</p>
+                            </div>
+                            <p className={`text-2xl font-bold ${parseFloat(result.note) >= 10 ? 'text-green-600' : 'text-red-600'}`}>
+                              {result.note}/20
+                            </p>
+                          </div>
+                          <div className="flex justify-between items-center">
+                            <span className={`px-3 py-1 text-xs rounded-full ${parseFloat(result.note) >= 10 ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
+                              {parseFloat(result.note) >= 10 ? 'Admis' : 'Ã‰chec'}
+                            </span>
+                            <button onClick={() => setSelectedStudent(result)} className="text-indigo-600 text-sm font-medium">
+                              DÃ©tails â†’
+                            </button>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+
+                    {/* Vue desktop - tableau complet gardÃ© tel quel */}
+                    <div className="hidden sm:block overflow-x-auto">
+                      <table className="w-full">
+                        <thead className="bg-gray-50">
+                          <tr>
+                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Ã‰tudiant</th>
+                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Classe</th>
+                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Note</th>
+                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">RÃ©ussite</th>
+                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Triche</th>
+                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Date</th>
+                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Actions</th>
+                          </tr>
+                        </thead>
+                        <tbody className="bg-white divide-y divide-gray-200">
+                          {filteredResults.map((result, index) => (
+                            <tr key={result.id || index} className="hover:bg-gray-50">
+                              <td className="px-6 py-4 whitespace-nowrap">
+                                <div className="text-sm font-medium text-gray-900">{result.etudiant}</div>
+                              </td>
+                              <td className="px-6 py-4 whitespace-nowrap">
+                                <div className="text-sm text-gray-600">{result.classe}</div>
+                              </td>
+                              <td className="px-6 py-4 whitespace-nowrap">
+                                <div className={`text-lg font-bold ${parseFloat(result.note) >= 10 ? 'text-green-600' : 'text-red-600'}`}>
+                                  {result.note}/20
+                                </div>
+                                <div className="text-xs text-gray-500">{result.correct}/{result.total} correct</div>
+                              </td>
+                              <td className="px-6 py-4 whitespace-nowrap">
+                                <span className={`px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${parseFloat(result.note) >= 10 ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
+                                  {parseFloat(result.note) >= 10 ? 'Admis' : 'Ã‰chec'}
+                                </span>
+                              </td>
+                              <td className="px-6 py-4 whitespace-nowrap">
+                                {result.tentativesTriche > 0 ? (
+                                  <div className="flex items-center text-red-600">
+                                    <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                                    </svg>
+                                    <span className="font-semibold">{result.tentativesTriche}</span>
+                                  </div>
+                                ) : (
+                                  <span className="text-green-600">âœ…</span>
+                                )}
+                              </td>
+                              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">{result.dateTest}</td>
+                              <td className="px-6 py-4 whitespace-nowrap text-sm">
+                                <button onClick={() => setSelectedStudent(result)} className="flex items-center gap-1 text-indigo-600 hover:text-indigo-900 font-medium">
+                                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                                  </svg>
+                                  DÃ©tails
+                                </button>
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                )}
+
+                {/* Modal dÃ©tails - adaptÃ© responsive - gardÃ© tel quel mais avec classes responsive */}
+                {selectedStudent && (
+                  <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+                    <div className="bg-white rounded-2xl shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto">
+                      <div className="sticky top-0 bg-white border-b p-4 sm:p-6">
+                        <div className="flex justify-between items-start">
+                          <div>
+                            <h2 className="text-xl sm:text-2xl font-bold text-gray-800">{selectedStudent.etudiant}</h2>
+                            <p className="text-sm sm:text-base text-gray-600">{selectedStudent.classe}</p>
+                          </div>
+                          <button onClick={() => {
+                            setSelectedStudent(null);
+                            setShowDetailedAnswers(false);
+                          }} className="text-gray-400 hover:text-gray-600">
+                            <svg className="w-6 h-6 sm:w-8 sm:h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                          </button>
+                        </div>
+                      </div>
+
+                      <div className="p-4 sm:p-6">
+                        <div className="bg-gradient-to-r from-indigo-500 to-purple-600 text-white rounded-xl p-6 mb-6">
+                          <div className="text-center">
+                            <p className="text-sm opacity-90 mb-2">Note Finale</p>
+                            <p className="text-5xl sm:text-6xl font-bold mb-2">{selectedStudent.note}/20</p>
+                            <p className="text-sm opacity-90">{selectedStudent.correct}/{selectedStudent.total} bonnes rÃ©ponses</p>
+                            {selectedStudent.penalite > 0 && (
+                              <p className="text-sm mt-2 bg-red-500 bg-opacity-30 py-2 px-4 rounded">
+                                PÃ©nalitÃ© : -{selectedStudent.penalite} points
+                              </p>
+                            )}
+                          </div>
+                        </div>
+
+                        <div className="grid grid-cols-2 gap-4 mb-6">
+                          <div className="bg-blue-50 p-4 rounded-lg">
+                            <p className="text-xs sm:text-sm text-gray-600">Points obtenus</p>
+                            <p className="text-lg sm:text-xl font-bold text-blue-600">{selectedStudent.points}/{selectedStudent.maxPoints}</p>
+                          </div>
+                          <div className="bg-green-50 p-4 rounded-lg">
+                            <p className="text-xs sm:text-sm text-gray-600">Pourcentage</p>
+                            <p className="text-lg sm:text-xl font-bold text-green-600">{selectedStudent.pourcentage}%</p>
+                          </div>
+                          <div className="bg-purple-50 p-4 rounded-lg">
+                            <p className="text-xs sm:text-sm text-gray-600">DurÃ©e</p>
+                            <p className="text-lg sm:text-xl font-bold text-purple-600">{selectedStudent.duree}</p>
+                          </div>
+                          <div className="bg-red-50 p-4 rounded-lg">
+                            <p className="text-xs sm:text-sm text-gray-600">Tentatives triche</p>
+                            <p className="text-lg sm:text-xl font-bold text-red-600">{selectedStudent.tentativesTriche}</p>
+                          </div>
+                        </div>
+
+                        {selectedStudent.tentativesTriche > 0 && (
+                          <div className="bg-yellow-50 border-l-4 border-yellow-400 p-4 mb-6">
+                            <p className="font-semibold text-yellow-700 mb-2 flex items-center text-sm">
+                              <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                              </svg>
+                              Avertissements :
+                            </p>
+                            <ul className="text-xs sm:text-sm text-yellow-600 space-y-1">
+                              {selectedStudent.avertissements.map((warning, idx) => (
+                                <li key={idx}>â€¢ {warning}</li>
+                              ))}
+                            </ul>
+                          </div>
+                        )}
+
+                        <div className="flex flex-col sm:flex-row gap-3">
+                          <button onClick={() => setShowDetailedAnswers(!showDetailedAnswers)} className="flex-1 flex items-center justify-center gap-2 px-4 py-3 bg-purple-600 text-white rounded-lg hover:bg-purple-700 text-sm sm:text-base">
+                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                            </svg>
+                            {showDetailedAnswers ? 'Masquer' : 'Voir'} les dÃ©tails
+                          </button>
+                          <button onClick={() => exportDetailedReport(selectedStudent)} className="flex-1 flex items-center justify-center gap-2 px-4 py-3 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 text-sm sm:text-base">
+                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                            </svg>
+                            Rapport
+                          </button>
+                          <button onClick={() => {
+                            setSelectedStudent(null);
+                            setShowDetailedAnswers(false);
+                          }} className="px-4 py-3 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 text-sm sm:text-base">
+                            Fermer
+                          </button>
+                        </div>
+
+                        {/* DÃ©tails des rÃ©ponses */}
+                        {showDetailedAnswers && selectedStudent.detailsReponses && (
+                          <div className="mt-6 space-y-4">
+                            {/* Questions correctes */}
+                            {(() => {
+                              const correctQuestions = selectedStudent.detailsReponses.filter(d => d.estCorrecte);
+                              if (correctQuestions.length === 0) return null;
                               return (
-                                <div key={detail.question} className="bg-white border-l-4 border-gray-400 p-3 rounded">
-                                  <div className="flex justify-between items-start mb-2">
-                                    <p className="font-semibold text-gray-800 text-sm">Question {q.id}</p>
-                                    <span className="text-xs bg-gray-600 text-white px-2 py-1 rounded">0 / {q.points} pts</span>
-                                  </div>
-                                  <p className="text-xs text-gray-700 mb-2">{q.question}</p>
-                                  <div className="code-block mb-2">
-                                    <pre>{q.code}</pre>
-                                  </div>
-                                  <div className="flex items-center gap-2 text-green-700 text-sm">
-                                    <i className="fas fa-check"></i>
-                                    <div>
-                                      <span className="font-semibold">Bonne réponse : </span>
-                                      <span>{q.options[q.correct]}</span>
-                                    </div>
+                                <div className="bg-green-50 rounded-lg p-4 border-2 border-green-200">
+                                  <h3 className="text-lg font-bold text-green-600 mb-4 flex items-center gap-2">
+                                    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                    </svg>
+                                    RÃ©ponses Correctes ({correctQuestions.length})
+                                  </h3>
+                                  <div className="space-y-3">
+                                    {correctQuestions.map((detail) => {
+                                      const q = QUIZ_CONFIG.questions.find(question => question.id === detail.question);
+                                      if (!q) return null;
+                                      return (
+                                        <div key={detail.question} className="bg-white border-l-4 border-green-500 p-3 sm:p-4 rounded">
+                                          <div className="flex justify-between items-start mb-2">
+                                            <p className="font-semibold text-gray-800 text-sm sm:text-base">Question {q.id}</p>
+                                            <span className="text-xs bg-green-600 text-white px-2 py-1 rounded">{q.points} pts</span>
+                                          </div>
+                                          <p className="text-xs sm:text-sm text-gray-700 mb-2">{q.question}</p>
+                                          <div className="bg-gray-900 text-green-400 p-2 rounded font-mono text-xs overflow-x-auto mb-2">
+                                            <pre>{q.code}</pre>
+                                          </div>
+                                          <div className="flex items-center gap-2 text-green-700 text-sm">
+                                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                                            </svg>
+                                            <span className="font-semibold">{q.options[q.correct]}</span>
+                                          </div>
+                                        </div>
+                                      );
+                                    })}
                                   </div>
                                 </div>
                               );
-                            })}
+                            })()}
+
+                            {/* Questions incorrectes */}
+                            {(() => {
+                              const incorrectQuestions = selectedStudent.detailsReponses.filter(d => !d.estCorrecte && d.reponse !== -1);
+                              if (incorrectQuestions.length === 0) return null;
+                              return (
+                                <div className="bg-red-50 rounded-lg p-4 border-2 border-red-200">
+                                  <h3 className="text-lg font-bold text-red-600 mb-4 flex items-center gap-2">
+                                    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                    </svg>
+                                    RÃ©ponses Incorrectes ({incorrectQuestions.length})
+                                  </h3>
+                                  <div className="space-y-3">
+                                    {incorrectQuestions.map((detail) => {
+                                      const q = QUIZ_CONFIG.questions.find(question => question.id === detail.question);
+                                      if (!q) return null;
+                                      return (
+                                        <div key={detail.question} className="bg-white border-l-4 border-red-500 p-3 sm:p-4 rounded">
+                                          <div className="flex justify-between items-start mb-2">
+                                            <p className="font-semibold text-gray-800 text-sm sm:text-base">Question {q.id}</p>
+                                            <span className="text-xs bg-red-600 text-white px-2 py-1 rounded">0 / {q.points} pts</span>
+                                          </div>
+                                          <p className="text-xs sm:text-sm text-gray-700 mb-2">{q.question}</p>
+                                          <div className="bg-gray-900 text-green-400 p-2 rounded font-mono text-xs overflow-x-auto mb-2">
+                                            <pre>{q.code}</pre>
+                                          </div>
+                                          <div className="space-y-2">
+                                            <div className="flex items-center gap-2 text-red-700 text-sm">
+                                              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                                              </svg>
+                                              <div>
+                                                <span className="font-semibold">RÃ©ponse donnÃ©e : </span>
+                                                <span>{q.options[detail.reponse]}</span>
+                                              </div>
+                                            </div>
+                                            <div className="flex items-center gap-2 text-green-700 text-sm">
+                                              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                                              </svg>
+                                              <div>
+                                                <span className="font-semibold">Bonne rÃ©ponse : </span>
+                                                <span>{q.options[q.correct]}</span>
+                                              </div>
+                                            </div>
+                                          </div>
+                                        </div>
+                                      );
+                                    })}
+                                  </div>
+                                </div>
+                              );
+                            })()}
+
+                            {/* Questions non rÃ©pondues */}
+                            {(() => {
+                              const unansweredQuestions = selectedStudent.detailsReponses.filter(d => d.reponse === -1);
+                              if (unansweredQuestions.length === 0) return null;
+                              return (
+                                <div className="bg-gray-50 rounded-lg p-4 border-2 border-gray-300">
+                                  <h3 className="text-lg font-bold text-gray-600 mb-4 flex items-center gap-2">
+                                    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                    </svg>
+                                    Questions Non RÃ©pondues ({unansweredQuestions.length})
+                                  </h3>
+                                  <div className="space-y-3">
+                                    {unansweredQuestions.map((detail) => {
+                                      const q = QUIZ_CONFIG.questions.find(question => question.id === detail.question);
+                                      if (!q) return null;
+                                      return (
+                                        <div key={detail.question} className="bg-white border-l-4 border-gray-400 p-3 sm:p-4 rounded">
+                                          <div className="flex justify-between items-start mb-2">
+                                            <p className="font-semibold text-gray-800 text-sm sm:text-base">Question {q.id}</p>
+                                            <span className="text-xs bg-gray-600 text-white px-2 py-1 rounded">0 / {q.points} pts</span>
+                                          </div>
+                                          <p className="text-xs sm:text-sm text-gray-700 mb-2">{q.question}</p>
+                                          <div className="bg-gray-900 text-green-400 p-2 rounded font-mono text-xs overflow-x-auto mb-2">
+                                            <pre>{q.code}</pre>
+                                          </div>
+                                          <div className="flex items-center gap-2 text-green-700 text-sm">
+                                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                                            </svg>
+                                            <div>
+                                              <span className="font-semibold">Bonne rÃ©ponse : </span>
+                                              <span>{q.options[q.correct]}</span>
+                                            </div>
+                                          </div>
+                                        </div>
+                                      );
+                                    })}
+                                  </div>
+                                </div>
+                              );
+                            })()}
                           </div>
-                        </div>
-                      );
-                    })()}
+                        )}
+                      </div>
+                    </div>
                   </div>
                 )}
               </div>
             </div>
-          )}
+          );
+        }
 
-          {/* Sessions actives */}
-          {showSessions && activeSessions.length > 0 && (
-            <div className="fixed bottom-4 right-4 bg-white rounded-xl shadow-2xl p-6 max-w-md">
-              <div className="flex justify-between items-center mb-4">
-                <h3 className="text-lg font-bold text-gray-800 flex items-center gap-2">
-                  <i className="fas fa-circle text-green-500 animate-pulse"></i>
-                  Sessions Actives
-                </h3>
-                <button onClick={() => setShowSessions(false)} className="text-gray-400 hover:text-gray-600">
-                  <i className="fas fa-times"></i>
-                </button>
-              </div>
-              <div className="space-y-2">
-                {activeSessions.map(session => (
-                  <div key={session.id} className="bg-green-50 p-3 rounded-lg border border-green-200">
-                    <p className="font-semibold text-gray-800">{session.prenom} {session.nom}</p>
-                    <p className="text-sm text-gray-600">{session.classe}</p>
-                    <p className="text-xs text-gray-500">Début: {new Date(session.dateDebut).toLocaleTimeString('fr-FR')}</p>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-        </div>
-      );
-    }
-
-    ReactDOM.render(<AdminDashboard />, document.getElementById('root'));
-  </script>
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<AdminDashboard />);
+    </script>
 </body>
 </html>
-
