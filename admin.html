@@ -24,8 +24,43 @@
         animation: pulse-ring 2s ease-in-out infinite;
       }
     </style>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    
+    <style>
+      @keyframes gradientShift {
+        0%, 100% { background-position: 0% 50%; }
+        50% { background-position: 100% 50%; }
+      }
+      
+      @keyframes float {
+        0%, 100% { transform: translateY(0px); }
+        50% { transform: translateY(-20px); }
+      }
+      
+      @keyframes pulse-ring {
+        0% { transform: scale(0.95); opacity: 1; }
+        50% { transform: scale(1.05); opacity: 0.7; }
+        100% { transform: scale(0.95); opacity: 1; }
+      }
+      
+      @keyframes slideIn {
+        from { opacity: 0; transform: translateY(30px); }
+        to { opacity: 1; transform: translateY(0); }
+      }
+      
+      .gradient-bg {
+        background: linear-gradient(-45deg, #667eea 0%, #764ba2 25%, #f093fb 50%, #4facfe 75%, #00f2fe 100%);
+        background-size: 400% 400%;
+        animation: gradientShift 15s ease infinite;
+      }
+      
+      .float-animation { animation: float 3s ease-in-out infinite; }
+      .animate-pulse-ring { animation: pulse-ring 2s ease-in-out infinite; }
+      .slide-in { animation: slideIn 0.5s ease-out; }
+      .code-editor { font-family: 'Fira Code', 'Consolas', 'Monaco', monospace; }
+    </style>
 </head>
-<body>
+<body class="gradient-bg min-h-screen">
     <div id="root"></div>
     
     <script type="text/babel">
@@ -54,161 +89,56 @@
         // Configuration du quiz - 50 QUESTIONS (pour affichage dÃ©tails)
         const QUIZ_CONFIG = {
           questions: [
-            { id: 1, code: `x = 5
-y = 3
-z = x + y * 2
-print(z)`, question: "Quelle est la sortie de ce code ?", options: ["16", "11", "13", "Erreur"], correct: 1, points: 1, difficulty: "Facile" },
-            { id: 2, code: `texte = "Python"
-print(type(texte))`, question: "Quel est le type de la variable 'texte' ?", options: ["<class 'int'>", "<class 'str'>", "string", "text"], correct: 1, points: 1, difficulty: "Facile" },
-            { id: 3, code: `liste = [10, 20, 30, 40]
-print(liste[-2])`, question: "Quelle est la sortie de ce code ?", options: ["20", "30", "40", "Erreur"], correct: 1, points: 1, difficulty: "Facile" },
-            { id: 4, code: `x = 17
-print(x % 5)`, question: "Quelle est la sortie de ce code ?", options: ["3", "2", "3.4", "0"], correct: 1, points: 1, difficulty: "Facile" },
-            { id: 5, code: `nom = "DIALLO"
-print(nom.lower())`, question: "Quelle est la sortie de ce code ?", options: ["DIALLO", "diallo", "Diallo", "dIALLO"], correct: 1, points: 1, difficulty: "Facile" },
-            { id: 6, code: `x = 8
-if x > 5:
-    print("Grand")`, question: "Quelle est la sortie de ce code ?", options: ["Grand", "Petit", "8", "Rien"], correct: 0, points: 1, difficulty: "Facile" },
-            { id: 7, code: `print(12 - 5)`, question: "Quelle est la sortie de ce code ?", options: ["17", "7", "12", "-5"], correct: 1, points: 1, difficulty: "Facile" },
-            { id: 8, code: `valeur = False
-print(valeur)`, question: "Quelle est la sortie de ce code ?", options: ["0", "False", "false", "None"], correct: 1, points: 1, difficulty: "Facile" },
-            { id: 9, code: `nombres = [5, 10, 15, 20]
-print(nombres[2])`, question: "Quelle est la sortie de ce code ?", options: ["10", "15", "2", "[15]"], correct: 1, points: 1, difficulty: "Facile" },
-            { id: 10, code: `a = 6
-b = 4
-print(a * b)`, question: "Quelle est la sortie de ce code ?", options: ["64", "10", "24", "2"], correct: 2, points: 1, difficulty: "Facile" },
-            { id: 11, code: `for i in range(2, 5):
-    print(i, end=" ")`, question: "Quelle est la sortie de ce code ?", options: ["2 3 4 5", "2 3 4 ", "3 4 5 ", "0 1 2 "], correct: 1, points: 1.25, difficulty: "Assez Facile" },
-            { id: 12, code: `prenom = "Fatou"
-nom = "Sow"
-print(prenom + " " + nom)`, question: "Quelle est la sortie de ce code ?", options: ["FatouSow", "Fatou Sow", "Fatou+Sow", "Erreur"], correct: 1, points: 1.25, difficulty: "Assez Facile" },
-            { id: 13, code: `ma_liste = [8, 3, 5, 1]
-ma_liste.sort()
-print(ma_liste)`, question: "Quelle est la sortie de ce code ?", options: ["[8, 3, 5, 1]", "[1, 3, 5, 8]", "[8, 5, 3, 1]", "None"], correct: 1, points: 1.25, difficulty: "Assez Facile" },
-            { id: 14, code: `nombre = 23
-print(nombre // 4)`, question: "Quelle est la sortie de ce code ?", options: ["5.75", "5", "6", "4"], correct: 1, points: 1.25, difficulty: "Assez Facile" },
-            { id: 15, code: `age = 18
-if age >= 18:
-    print("Majeur")
-else:
-    print("Mineur")`, question: "Quelle est la sortie de ce code ?", options: ["Majeur", "Mineur", "18", "Rien"], correct: 0, points: 1.25, difficulty: "Assez Facile" },
-            { id: 16, code: `ville = "dakar"
-print(ville.upper())`, question: "Quelle est la sortie de ce code ?", options: ["dakar", "DAKAR", "Dakar", "dAKAR"], correct: 1, points: 1.25, difficulty: "Assez Facile" },
-            { id: 17, code: `fruits = ["pomme", "banane"]
-fruits.append("orange")
-print(len(fruits))`, question: "Quelle est la sortie de ce code ?", options: ["2", "3", "orange", "Erreur"], correct: 1, points: 1.25, difficulty: "Assez Facile" },
-            { id: 18, code: `compteur = 0
-while compteur < 4:
-    compteur += 1
-print(compteur)`, question: "Quelle est la sortie de ce code ?", options: ["3", "4", "5", "0"], correct: 1, points: 1.25, difficulty: "Assez Facile" },
-            { id: 19, code: `resultat = 7 < 12
-print(resultat)`, question: "Quelle est la sortie de ce code ?", options: ["False", "True", "7", "12"], correct: 1, points: 1.25, difficulty: "Assez Facile" },
-            { id: 20, code: `message = "Bonjour ISI"
-print(len(message))`, question: "Quelle est la sortie de ce code ?", options: ["10", "11", "12", "9"], correct: 1, points: 1.25, difficulty: "Assez Facile" },
-            { id: 21, code: `nombres = [2, 4, 6, 8, 10]
-print(nombres[1:4])`, question: "Quelle est la sortie de ce code ?", options: ["[2, 4, 6]", "[4, 6, 8]", "[4, 6, 8, 10]", "[2, 4, 6, 8]"], correct: 1, points: 1.5, difficulty: "Moyen" },
-            { id: 22, code: `texte = "je suis ingenieur"
-mots = texte.split()
-print(len(mots))`, question: "Quelle est la sortie de ce code ?", options: ["1", "3", "18", "4"], correct: 1, points: 1.5, difficulty: "Moyen" },
-            { id: 23, code: `base = 3
-exposant = 4
-print(base ** exposant)`, question: "Quelle est la sortie de ce code ?", options: ["12", "7", "81", "64"], correct: 2, points: 1.5, difficulty: "Moyen" },
-            { id: 24, code: `for num in range(6):
-    if num == 3:
-        continue
-    print(num, end="")`, question: "Quelle est la sortie de ce code ?", options: ["012345", "01245", "12345", "0123"], correct: 1, points: 1.5, difficulty: "Moyen" },
-            { id: 25, code: `animaux = ["chat", "chien"]
-animaux.insert(1, "oiseau")
-print(animaux)`, question: "Quelle est la sortie de ce code ?", options: ["['chat', 'oiseau', 'chien']", "['oiseau', 'chat', 'chien']", "['chat', 'chien', 'oiseau']", "Erreur"], correct: 0, points: 1.5, difficulty: "Moyen" },
-            { id: 26, code: `x = 15
-if x > 10 and x < 20:
-    print("OK")
-else:
-    print("NON")`, question: "Quelle est la sortie de ce code ?", options: ["OK", "NON", "15", "True"], correct: 0, points: 1.5, difficulty: "Moyen" },
-            { id: 27, code: `mot = "CODE"
-print(mot * 3)`, question: "Quelle est la sortie de ce code ?", options: ["CODE CODE CODE", "CODECODECODE", "CODE3", "Erreur"], correct: 1, points: 1.5, difficulty: "Moyen" },
-            { id: 28, code: `valeurs = [5, 10, 15]
-valeurs.reverse()
-print(valeurs)`, question: "Quelle est la sortie de ce code ?", options: ["[5, 10, 15]", "[15, 10, 5]", "None", "[10, 15, 5]"], correct: 1, points: 1.5, difficulty: "Moyen" },
-            { id: 29, code: `def multiplier(a, b):
-    return a * b
-print(multiplier(4, 7))`, question: "Quelle est la sortie de ce code ?", options: ["11", "28", "47", "None"], correct: 1, points: 1.5, difficulty: "Moyen" },
-            { id: 30, code: `n = 9
-type_nombre = "Pair" if n % 2 == 0 else "Impair"
-print(type_nombre)`, question: "Quelle est la sortie de ce code ?", options: ["Pair", "Impair", "9", "True"], correct: 1, points: 1.5, difficulty: "Moyen" },
-            { id: 31, code: `L1 = [1, 2]
-L1.extend([3, 4, 5])
-print(len(L1))`, question: "Quelle est la sortie de ce code ?", options: ["2", "3", "5", "4"], correct: 2, points: 1.75, difficulty: "Assez Difficile" },
-            { id: 32, code: `chaine = "127"
-resultat = int(chaine) + 13
-print(resultat)`, question: "Quelle est la sortie de ce code ?", options: ["12713", "140", "127", "Erreur"], correct: 1, points: 1.75, difficulty: "Assez Difficile" },
-            { id: 33, code: `total = 0
-for i in range(1, 5):
-    total += i
-print(total)`, question: "Quelle est la sortie de ce code ?", options: ["5", "10", "15", "0"], correct: 1, points: 1.75, difficulty: "Assez Difficile" },
-            { id: 34, code: `donnees = "nom,prenom,age"
-liste = donnees.split(',')
-print(len(liste))`, question: "Quelle est la sortie de ce code ?", options: ["1", "2", "3", "15"], correct: 2, points: 1.75, difficulty: "Assez Difficile" },
-            { id: 35, code: `x = 15
-while x > 8:
-    x -= 3
-    if x == 9:
-        break
-print(x)`, question: "Quelle est la sortie de ce code ?", options: ["6", "9", "12", "8"], correct: 1, points: 1.75, difficulty: "Assez Difficile" },
-            { id: 36, code: `def verifier(valeur):
-    if valeur > 100:
-        return "Grand"
-    return "Petit"
-print(verifier(50))`, question: "Quelle est la sortie de ce code ?", options: ["Grand", "Petit", "50", "None"], correct: 1, points: 1.75, difficulty: "Assez Difficile" },
-            { id: 37, code: `mots = ["Bon", "jour"]
-phrase = "-".join(mots)
-print(phrase)`, question: "Quelle est la sortie de ce code ?", options: ["Bonjour", "Bon-jour", "Bon jour", "['Bon', 'jour']"], correct: 1, points: 1.75, difficulty: "Assez Difficile" },
-            { id: 38, code: `texte = "Python3"
-nouveau = texte.replace("3", "2024")
-print(nouveau)`, question: "Quelle est la sortie de ce code ?", options: ["Python3", "Python2024", "Python", "Erreur"], correct: 1, points: 1.75, difficulty: "Assez Difficile" },
-            { id: 39, code: `valeurs = [12, 7, 25, 3, 18]
-print(max(valeurs) - min(valeurs))`, question: "Quelle est la sortie de ce code ?", options: ["15", "22", "25", "28"], correct: 1, points: 1.75, difficulty: "Assez Difficile" },
-            { id: 40, code: `a = 10
-b = 20
-a, b = b, a
-print(a, b)`, question: "Quelle est la sortie de ce code ?", options: ["10 20", "20 10", "30 30", "Erreur"], correct: 1, points: 1.75, difficulty: "Assez Difficile" },
-            { id: 41, code: `mot = "PYTHON"
-print(mot[::-1])`, question: "Quelle est la sortie de ce code ?", options: ["PYTHON", "NOHTYP", "PYTH", "THON"], correct: 1, points: 2, difficulty: "Très Difficile" },
-            { id: 42, code: `def somme_recursif(n):
-    if n <= 0:
-        return 0
-    return n + somme_recursif(n - 1)
-print(somme_recursif(5))`, question: "Quelle est la sortie de ce code ?", options: ["5", "10", "15", "Erreur"], correct: 2, points: 2, difficulty: "Très Difficile" },
-            { id: 43, code: `liste = [1, 2, 3, 4, 5, 6]
-resultat = [x for x in liste if x % 2 == 1]
-print(resultat)`, question: "Quelle est la sortie de ce code ?", options: ["[2, 4, 6]", "[1, 3, 5]", "[1, 2, 3, 4, 5, 6]", "[]"], correct: 1, points: 2, difficulty: "Très Difficile" },
-            { id: 44, code: `liste1 = [1, 2, 3]
-liste2 = liste1
-liste2.append(4)
-print(liste1)`, question: "Quelle est la sortie ? (Piège!)", options: ["[1, 2, 3]", "[1, 2, 3, 4]", "[4]", "Erreur"], correct: 1, points: 2, difficulty: "Très Difficile" },
-            { id: 45, code: `def calcul(a, b=10, c=5):
-    return a + b - c
-print(calcul(5, c=2))`, question: "Quelle est la sortie de ce code ?", options: ["12", "13", "17", "Erreur"], correct: 1, points: 2, difficulty: "Très Difficile" },
-            { id: 46, code: `M = [[1, 2, 3], [4, 5, 6]]
-print(M[1][2])`, question: "Quelle est la sortie de ce code ?", options: ["3", "5", "6", "2"], correct: 2, points: 2, difficulty: "Très Difficile" },
-            { id: 47, code: `compte = 0
-for i in range(1, 11):
-    if i % 2 == 0:
-        compte += 1
-print(compte)`, question: "Quelle est la sortie de ce code ?", options: ["4", "5", "6", "10"], correct: 1, points: 2, difficulty: "Très Difficile" },
-            { id: 48, code: `def ajouter(liste):
-    liste.append(999)
-
-ma_liste = [1, 2, 3]
-ajouter(ma_liste)
-print(len(ma_liste))`, question: "Quelle est la sortie de ce code ?", options: ["3", "4", "999", "Erreur"], correct: 1, points: 2, difficulty: "Très Difficile" },
-            { id: 49, code: `notes = [12, 15, 18, 14, 16]
-moyenne = sum(notes) / len(notes)
-print(round(moyenne, 1))`, question: "Quelle est la sortie de ce code ?", options: ["14.0", "15.0", "15.5", "14.5"], correct: 1, points: 2, difficulty: "Très Difficile" },
-            { id: 50, code: `data = [8, 3, 5, 1, 9]
-triee = sorted(data)
-mediane = triee[len(triee)//2]
-print(mediane)`, question: "Quelle est la sortie de ce code ?", options: ["3", "5", "8", "9"], correct: 1, points: 2, difficulty: "Très Difficile" }
+            { id: 1, code: `x = int(4.9)\nprint(x)`, question: "Quelle est la sortie ? (conversion float vers int)", options: ["4.9", "4", "5", "Erreur"], correct: 1, points: 1, difficulty: "Facile" },
+            { id: 2, code: `texte = "Python"\nprint(len(texte))`, question: "Quelle est la longueur de la chaîne ?", options: ["5", "6", "7", "Erreur"], correct: 1, points: 1, difficulty: "Facile" },
+            { id: 3, code: `x = True\nprint(int(x))`, question: "Que retourne int(True) ?", options: ["True", "1", "0", "Erreur"], correct: 1, points: 1, difficulty: "Facile" },
+            { id: 4, code: `liste = [10, 20, 30]\nprint(liste[-1])`, question: "Quelle est la sortie ?", options: ["10", "30", "-1", "Erreur"], correct: 1, points: 1, difficulty: "Facile" },
+            { id: 5, code: `print(type(3.14))`, question: "Quel est le type de 3.14 ?", options: ["<class 'int'>", "<class 'float'>", "<class 'str'>", "<class 'decimal'>"], correct: 1, points: 1, difficulty: "Facile" },
+            { id: 6, code: `x = 10\nprint(x // 3)`, question: "Quelle est la sortie de la division entière ?", options: ["3.33", "3", "4", "Erreur"], correct: 1, points: 1, difficulty: "Facile" },
+            { id: 7, code: `liste = [1, 2, 3]\nliste.append(4)\nprint(len(liste))`, question: "Quelle est la longueur finale ?", options: ["3", "4", "5", "7"], correct: 1, points: 1, difficulty: "Facile" },
+            { id: 8, code: `x = "hello"\nprint(x.upper())`, question: "Quelle est la sortie ?", options: ["hello", "HELLO", "Hello", "Erreur"], correct: 1, points: 1, difficulty: "Facile" },
+            { id: 9, code: `print(10 % 3)`, question: "Que retourne l'opérateur modulo ?", options: ["3", "10", "1", "0"], correct: 2, points: 1, difficulty: "Facile" },
+            { id: 10, code: `x = [5, 2, 8, 1]\nprint(max(x))`, question: "Quelle est la sortie ?", options: ["5", "2", "8", "1"], correct: 2, points: 1, difficulty: "Facile" },
+            { id: 11, code: `mots = "Python est super".split()\nprint(len(mots))`, question: "Combien de mots dans la liste ?", options: ["1", "2", "3", "4"], correct: 2, points: 1.25, difficulty: "Assez Facile" },
+            { id: 12, code: `x = "123"\ny = int(x)\nprint(y + 7)`, question: "Quelle est la sortie ?", options: ["1237", "130", "Erreur", "123+7"], correct: 1, points: 1.25, difficulty: "Assez Facile" },
+            { id: 13, code: `liste = [1, 2, 3, 4, 5]\nprint(liste[1:4])`, question: "Que retourne le slicing ?", options: ["[1, 2, 3]", "[2, 3, 4]", "[1, 2, 3, 4]", "[2, 3, 4, 5]"], correct: 1, points: 1.25, difficulty: "Assez Facile" },
+            { id: 14, code: `x = "bonjour"\nprint(x[0] + x[-1])`, question: "Quelle est la sortie ?", options: ["br", "jr", "bn", "bonjourr"], correct: 0, points: 1.25, difficulty: "Assez Facile" },
+            { id: 15, code: `for i in range(3):\n    print(i, end="")`, question: "Quelle est la sortie complète ?", options: ["123", "012", "0 1 2", "321"], correct: 1, points: 1.25, difficulty: "Assez Facile" },
+            { id: 16, code: `x = 15\nresultat = "Pair" if x % 2 == 0 else "Impair"\nprint(resultat)`, question: "Quelle est la sortie ?", options: ["Pair", "Impair", "True", "False"], correct: 1, points: 1.25, difficulty: "Assez Facile" },
+            { id: 17, code: `x = [1, 2, 3]\nx.extend([4, 5])\nprint(len(x))`, question: "Quelle est la longueur finale ?", options: ["3", "5", "8", "Erreur"], correct: 1, points: 1.25, difficulty: "Assez Facile" },
+            { id: 18, code: `texte = "  Python  "\nprint(len(texte.strip()))`, question: "Quelle est la longueur après strip() ?", options: ["10", "8", "6", "Erreur"], correct: 2, points: 1.25, difficulty: "Assez Facile" },
+            { id: 19, code: `x = [5, 2, 8, 1]\nx.sort()\nprint(x[0])`, question: "Quel est le premier élément après tri ?", options: ["5", "2", "8", "1"], correct: 3, points: 1.25, difficulty: "Assez Facile" },
+            { id: 20, code: `print("abc" * 3)`, question: "Quelle est la sortie ?", options: ["abc3", "abcabcabc", "aaa bbb ccc", "Erreur"], correct: 1, points: 1.25, difficulty: "Assez Facile" },
+            { id: 21, code: `liste = [1, 2, 3, 2, 1]\nprint(liste.count(2))`, question: "Combien de fois 2 apparaît ?", options: ["1", "2", "3", "5"], correct: 1, points: 1.5, difficulty: "Moyen" },
+            { id: 22, code: `x = 5\ny = 2\nprint(x ** y)`, question: "Que retourne l'opérateur ** (puissance) ?", options: ["7", "10", "25", "52"], correct: 2, points: 1.5, difficulty: "Moyen" },
+            { id: 23, code: `def somme(a, b):\n    return a + b\nprint(somme(3, 4))`, question: "Quelle est la sortie ?", options: ["34", "7", "None", "Erreur"], correct: 1, points: 1.5, difficulty: "Moyen" },
+            { id: 24, code: `texte = "nom,age,ville"\nelements = texte.split(',')\nprint(len(elements))`, question: "Combien d'éléments dans la liste ?", options: ["1", "2", "3", "Erreur"], correct: 2, points: 1.5, difficulty: "Moyen" },
+            { id: 25, code: `x = [1, 2, 3]\nx[1] = 10\nprint(x)`, question: "Quelle est la sortie ?", options: ["[1, 10, 3]", "[10, 2, 3]", "[1, 2, 10]", "Erreur"], correct: 0, points: 1.5, difficulty: "Moyen" },
+            { id: 26, code: `liste = [1, 2]\ny = [3, 4]\nz = liste + y\nprint(len(z))`, question: "Quelle est la longueur de z ?", options: ["2", "3", "4", "Erreur"], correct: 2, points: 1.5, difficulty: "Moyen" },
+            { id: 27, code: `mots = ["a", "b", "c"]\nresultat = "-".join(mots)\nprint(resultat)`, question: "Quelle est la sortie ?", options: ["abc", "a-b-c", "a b c", "Erreur"], correct: 1, points: 1.5, difficulty: "Moyen" },
+            { id: 28, code: `for i in range(5):\n    if i == 2:\n        continue\n    print(i, end=" ")`, question: "Quelle est la sortie ?", options: ["0 1 2 3 4", "0 1 3 4", "0 1 2", "3 4"], correct: 1, points: 1.5, difficulty: "Moyen" },
+            { id: 29, code: `x = "abc"\ny = x.replace("b", "X")\nprint(y)`, question: "Quelle est la sortie ?", options: ["abc", "aXc", "Xbc", "abX"], correct: 1, points: 1.5, difficulty: "Moyen" },
+            { id: 30, code: `x = 3\ny = 5\nx, y = y, x\nprint(x)`, question: "Que vaut x après l'échange ?", options: ["3", "5", "8", "Erreur"], correct: 1, points: 1.5, difficulty: "Moyen" },
+            { id: 31, code: `i = 0\nwhile i < 3:\n    i += 1\nprint(i)`, question: "Quelle est la valeur finale de i ?", options: ["0", "2", "3", "4"], correct: 2, points: 1.75, difficulty: "Assez Difficile" },
+            { id: 32, code: `x = 5\nfor i in range(3):\n    x += i\nprint(x)`, question: "Quelle est la valeur finale de x ? (x=5, puis +0, +1, +2)", options: ["5", "6", "8", "11"], correct: 2, points: 1.75, difficulty: "Assez Difficile" },
+            { id: 33, code: `x = 10\nwhile x > 0:\n    x -= 3\n    if x == 4:\n        break\nprint(x)`, question: "Quelle est la valeur de x à la sortie ?", options: ["1", "4", "0", "7"], correct: 1, points: 1.75, difficulty: "Assez Difficile" },
+            { id: 34, code: `def test(n):\n    if n > 0:\n        return n\n    return 0\nprint(test(-5))`, question: "Quelle est la sortie ?", options: ["-5", "5", "0", "None"], correct: 2, points: 1.75, difficulty: "Assez Difficile" },
+            { id: 35, code: `texte = "je suis ingenieur"\nprint(texte.title())`, question: "Quelle est la sortie ?", options: ["je suis ingenieur", "Je Suis Ingenieur", "JE SUIS INGENIEUR", "Je suis ingenieur"], correct: 1, points: 1.75, difficulty: "Assez Difficile" },
+            { id: 36, code: `liste = [5, 10, 15, 20]\nprint(liste[-2])`, question: "Quelle est la sortie avec l'index négatif ?", options: ["20", "15", "10", "5"], correct: 1, points: 1.75, difficulty: "Assez Difficile" },
+            { id: 37, code: `x = [1, 2, 3, 4, 5]\nprint(x[::2])`, question: "Que retourne le slicing avec pas de 2 ?", options: ["[1, 2, 3]", "[1, 3, 5]", "[2, 4]", "[1, 2]"], correct: 1, points: 1.75, difficulty: "Assez Difficile" },
+            { id: 38, code: `x = "123"\nprint(x * 2)`, question: "Quelle est la sortie ?", options: ["246", "123123", "6", "Erreur"], correct: 1, points: 1.75, difficulty: "Assez Difficile" },
+            { id: 39, code: `nums = [1, 2, 3]\nprint(sum(nums) / len(nums))`, question: "Quelle est la moyenne calculée ?", options: ["1", "2", "2.0", "6"], correct: 2, points: 1.75, difficulty: "Assez Difficile" },
+            { id: 40, code: `x = [3, 1, 4, 1, 5]\nx.reverse()\nprint(x[0])`, question: "Quel est le premier élément après reverse() ?", options: ["3", "1", "5", "4"], correct: 2, points: 1.75, difficulty: "Assez Difficile" },
+            { id: 41, code: `for i in range(2, 10, 3):\n    print(i, end=" ")`, question: "Quelle est la sortie du range avec pas de 3 ?", options: ["2 5 8", "2 5 8 11", "3 6 9", "2 3 4"], correct: 0, points: 2, difficulty: "Difficile" },
+            { id: 42, code: `x = [1, 2, 3]\ny = x\ny.append(4)\nprint(len(x))`, question: "Quelle est la longueur de x ? (référence)", options: ["3", "4", "7", "Erreur"], correct: 1, points: 2, difficulty: "Difficile" },
+            { id: 43, code: `texte = "Python"\nprint(texte[1:4])`, question: "Que retourne ce slicing ?", options: ["Pyt", "yth", "ytho", "Pyth"], correct: 1, points: 2, difficulty: "Difficile" },
+            { id: 44, code: `x = [1, 2, 3, 4, 5]\nprint(x[::-1])`, question: "Que fait le slicing avec pas -1 ?", options: ["[1, 2, 3, 4, 5]", "[5, 4, 3, 2, 1]", "[2, 4]", "Erreur"], correct: 1, points: 2, difficulty: "Difficile" },
+            { id: 45, code: `x = "a,b,c"\ny = x.split(',')\nz = "-".join(y)\nprint(z)`, question: "Quelle transformation est effectuée ?", options: ["a,b,c", "a-b-c", "abc", "a b c"], correct: 1, points: 2, difficulty: "Difficile" },
+            { id: 46, code: `x = 0\nfor i in range(4):\n    if i % 2 == 0:\n        x += i\nprint(x)`, question: "Quelle est la somme des nombres pairs ?", options: ["0", "2", "4", "6"], correct: 1, points: 2, difficulty: "Difficile" },
+            { id: 47, code: `liste = [5, 2, 8, 1, 9]\nliste.sort()\nprint(liste[2])`, question: "Quel est l'élément du milieu après tri ?", options: ["8", "5", "2", "9"], correct: 1, points: 2, difficulty: "Difficile" },
+            { id: 48, code: `x = "ingenieur logiciel"\ny = x.replace("logiciel", "civil")\nprint(y)`, question: "Quelle est la chaîne finale ?", options: ["ingenieur logiciel", "ingenieur civil", "civil logiciel", "Erreur"], correct: 1, points: 2, difficulty: "Difficile" },
+            { id: 49, code: `x = [1, 2, 3]\ny = x[:]\ny.append(4)\nprint(len(x))`, question: "Quelle est la longueur de x ? (copie superficielle)", options: ["3", "4", "7", "Erreur"], correct: 0, points: 2, difficulty: "Difficile" },
+            { id: 50, code: `nombres = [10, 20, 30]\nsomme = sum(nombres)\nmoyenne = somme / len(nombres)\nprint(int(moyenne))`, question: "Quelle est la moyenne convertie en entier ?", options: ["10", "15", "20", "60"], correct: 2, points: 2, difficulty: "Difficile" },
           ]
         };
 
