@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Dashboard - Quiz Python ISI Keur Massar</title>
+    <title>Administration - Quiz Python ISI Keur Massar</title>
     
     <!-- React et ReactDOM (CRITIQUE : DOIT ÊTRE EN PREMIER) -->
     <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
@@ -31,22 +31,19 @@
             50% { background-position: 100% 50%; }
         }
         
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-        
-        @keyframes slideIn {
-            from { opacity: 0; transform: translateX(-20px); }
-            to { opacity: 1; transform: translateX(0); }
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-20px); }
         }
         
         @keyframes pulse-glow {
             0%, 100% { 
                 box-shadow: 0 0 20px rgba(99, 102, 241, 0.5);
+                transform: scale(1);
             }
             50% { 
                 box-shadow: 0 0 40px rgba(99, 102, 241, 0.8);
+                transform: scale(1.02);
             }
         }
         
@@ -56,12 +53,12 @@
             animation: gradientShift 15s ease infinite;
         }
         
-        .animate-fadeIn { 
-            animation: fadeIn 0.5s ease-out; 
+        .float-animation {
+            animation: float 3s ease-in-out infinite;
         }
         
-        .animate-slideIn { 
-            animation: slideIn 0.5s ease-out; 
+        .pulse-glow {
+            animation: pulse-glow 2s ease-in-out infinite;
         }
         
         .glass-effect {
@@ -69,27 +66,24 @@
             backdrop-filter: blur(10px);
             border: 1px solid rgba(255, 255, 255, 0.2);
         }
-        
-        .sidebar-hover {
-            transition: all 0.3s ease;
+
+        @keyframes pulse-dot {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
         }
         
-        .sidebar-hover:hover {
-            background: rgba(255, 255, 255, 0.15);
-            transform: translateX(5px);
-        }
-        
-        .pulse-glow {
-            animation: pulse-glow 2s ease-in-out infinite;
+        .pulse-dot {
+            animation: pulse-dot 1.5s ease-in-out infinite;
         }
     </style>
 </head>
-<body class="bg-gray-50">
+<body>
     <div id="root"></div>
 
     <script type="text/babel">
         const { useState, useEffect } = React;
 
+        // Configuration Firebase
         const firebaseConfig = {
             apiKey: "AIzaSyCYjXM6YrfB862p48g6_mYX66C_La0ZsI0",
             authDomain: "quiz-python-isikm.firebaseapp.com",
@@ -105,12 +99,13 @@
         const db = firebase.firestore();
 
         const ADMIN_CREDENTIALS = {
-            login: 'mustafa',
-            password: '14051994'
+            username: "mustafa",
+            password: "14051994"
         };
 
         const QUIZ_CONFIG = {
             questions: [
+                // QUESTIONS 1-50 (ORIGINALES)
                 { id: 1, code: `x = int(4.9)\nprint(x)`, question: "Quelle est la sortie ? (conversion float vers int)", options: ["4.9", "4", "5", "Erreur"], correct: 1, points: 1, difficulty: "Facile" },
                 { id: 2, code: `texte = "Python"\nprint(len(texte))`, question: "Quelle est la longueur de la chaîne ?", options: ["5", "6", "7", "Erreur"], correct: 1, points: 1, difficulty: "Facile" },
                 { id: 3, code: `x = True\nprint(int(x))`, question: "Que retourne int(True) ?", options: ["True", "1", "0", "Erreur"], correct: 1, points: 1, difficulty: "Facile" },
@@ -161,93 +156,87 @@
                 { id: 48, code: `x = "ingenieur logiciel"\ny = x.replace("logiciel", "civil")\nprint(y)`, question: "Quelle est la chaîne finale ?", options: ["ingenieur logiciel", "ingenieur civil", "civil logiciel", "Erreur"], correct: 1, points: 2, difficulty: "Difficile" },
                 { id: 49, code: `x = [1, 2, 3]\ny = x[:]\ny.append(4)\nprint(len(x))`, question: "Quelle est la longueur de x ? (copie superficielle)", options: ["3", "4", "7", "Erreur"], correct: 0, points: 2, difficulty: "Difficile" },
                 { id: 50, code: `nombres = [10, 20, 30]\nsomme = sum(nombres)\nmoyenne = somme / len(nombres)\nprint(int(moyenne))`, question: "Quelle est la moyenne convertie en entier ?", options: ["10", "15", "20", "60"], correct: 2, points: 2, difficulty: "Difficile" },
+                
+                // NOUVELLES QUESTIONS 51-80 (IF/ELSE, BOUCLES, FONCTIONS)
+                { id: 51, code: `x = 7\nif x > 5:\n    print("A")\nelse:\n    print("B")`, question: "Quelle est la sortie ?", options: ["A", "B", "AB", "Rien"], correct: 0, points: 1.5, difficulty: "Moyen" },
+                { id: 52, code: `n = 10\nif n % 2 == 0 and n > 5:\n    print("Oui")\nelse:\n    print("Non")`, question: "Quelle est la sortie ?", options: ["Oui", "Non", "True", "False"], correct: 0, points: 1.5, difficulty: "Moyen" },
+                { id: 53, code: `age = 17\nif age >= 18:\n    print("Majeur")\nelif age >= 13:\n    print("Ado")\nelse:\n    print("Enfant")`, question: "Quelle est la sortie ?", options: ["Majeur", "Ado", "Enfant", "Erreur"], correct: 1, points: 1.75, difficulty: "Assez Difficile" },
+                { id: 54, code: `x = 0\nfor i in range(1, 6):\n    x += i\nprint(x)`, question: "Quelle est la valeur finale de x ?", options: ["10", "15", "21", "6"], correct: 1, points: 1.75, difficulty: "Assez Difficile" },
+                { id: 55, code: `compteur = 0\nfor i in range(10):\n    if i > 5:\n        compteur += 1\nprint(compteur)`, question: "Combien de fois la condition est vraie ?", options: ["3", "4", "5", "6"], correct: 1, points: 1.75, difficulty: "Assez Difficile" },
+                { id: 56, code: `resultat = 1\nfor i in range(1, 5):\n    resultat *= i\nprint(resultat)`, question: "Quelle est la valeur de resultat ? (factorielle de 4)", options: ["10", "20", "24", "120"], correct: 2, points: 2, difficulty: "Difficile" },
+                { id: 57, code: `i = 1\nwhile i <= 5:\n    i += 1\nprint(i)`, question: "Quelle est la valeur finale de i ?", options: ["5", "6", "4", "Boucle infinie"], correct: 1, points: 1.75, difficulty: "Assez Difficile" },
+                { id: 58, code: `x = 0\ni = 0\nwhile i < 4:\n    x += i\n    i += 1\nprint(x)`, question: "Quelle est la valeur finale de x ?", options: ["4", "6", "10", "0"], correct: 1, points: 2, difficulty: "Difficile" },
+                { id: 59, code: `n = 15\nwhile n > 10:\n    n -= 2\nprint(n)`, question: "Quelle est la valeur finale de n ?", options: ["9", "10", "11", "8"], correct: 0, points: 1.75, difficulty: "Assez Difficile" },
+                { id: 60, code: `for i in range(3):\n    for j in range(2):\n        print("*", end="")\n    print()`, question: "Combien d'étoiles sont affichées au total ?", options: ["5", "6", "3", "2"], correct: 1, points: 2, difficulty: "Difficile" },
+                { id: 61, code: `def test1(n):\n    return n * 2\nprint(test1(5))`, question: "Quelle est la sortie ?", options: ["5", "10", "25", "None"], correct: 1, points: 1.5, difficulty: "Moyen" },
+                { id: 62, code: `def test2(nom):\n    return "Bonjour " + nom\nprint(test2("Ali"))`, question: "Quelle est la sortie ?", options: ["Bonjour", "Ali", "Bonjour Ali", "Erreur"], correct: 2, points: 1.5, difficulty: "Moyen" },
+                { id: 63, code: `def test3(n):\n    return n % 2 == 0\nprint(test3(7))`, question: "Quelle est la sortie ?", options: ["True", "False", "1", "0"], correct: 1, points: 1.75, difficulty: "Assez Difficile" },
+                { id: 64, code: `def test4(a, b):\n    if a > b:\n        return a\n    return b\nprint(test4(8, 5))`, question: "Quelle est la sortie ?", options: ["5", "8", "13", "None"], correct: 1, points: 1.75, difficulty: "Assez Difficile" },
+                { id: 65, code: `def test5(x, y):\n    return x + y, x - y\na, b = test5(10, 3)\nprint(a)`, question: "Quelle est la valeur de a ?", options: ["10", "3", "13", "7"], correct: 2, points: 2, difficulty: "Difficile" },
+                { id: 66, code: `def test6(n=5):\n    return n + 1\nprint(test6())`, question: "Quelle est la sortie ? (paramètre par défaut)", options: ["5", "6", "1", "None"], correct: 1, points: 1.75, difficulty: "Assez Difficile" },
+                { id: 67, code: `liste = [1, 2, 3, 4, 5]\nfor i in liste:\n    if i == 3:\n        break\n    print(i, end="")`, question: "Quelle est la sortie ?", options: ["123", "12", "12345", "345"], correct: 1, points: 1.75, difficulty: "Assez Difficile" },
+                { id: 68, code: `x = 20\nif x > 10:\n    if x > 15:\n        print("Grand")\n    else:\n        print("Moyen")\nelse:\n    print("Petit")`, question: "Quelle est la sortie ? (if imbriqués)", options: ["Grand", "Moyen", "Petit", "Erreur"], correct: 0, points: 2, difficulty: "Difficile" },
+                { id: 69, code: `def test7(liste):\n    count = 0\n    for n in liste:\n        if n > 0:\n            count += 1\n    return count\nprint(test7([1, -2, 3, -4, 5]))`, question: "Quelle est la sortie ?", options: ["2", "3", "5", "0"], correct: 1, points: 2, difficulty: "Difficile" },
+                { id: 70, code: `for i in range(5):\n    if i % 2 != 0:\n        continue\n    print(i, end="")`, question: "Quelle est la sortie ?", options: ["024", "135", "01234", "12345"], correct: 0, points: 1.75, difficulty: "Assez Difficile" },
+                { id: 71, code: `def test8(base, exp):\n    resultat = 1\n    for i in range(exp):\n        resultat *= base\n    return resultat\nprint(test8(2, 3))`, question: "Quelle est la sortie ?", options: ["6", "8", "9", "5"], correct: 1, points: 2, difficulty: "Difficile" },
+                { id: 72, code: `x = 5\nwhile x > 0:\n    if x == 2:\n        break\n    x -= 1\nprint(x)`, question: "Quelle est la valeur finale de x ?", options: ["0", "1", "2", "-1"], correct: 2, points: 2, difficulty: "Difficile" },
+                { id: 73, code: `def test9(lst):\n    total = 0\n    for num in lst:\n        total += num\n    return total\nprint(test9([2, 4, 6]))`, question: "Quelle est la sortie ?", options: ["6", "12", "246", "0"], correct: 1, points: 2, difficulty: "Difficile" },
+                { id: 74, code: `note = 12\nif note >= 16:\n    mention = "TB"\nelif note >= 14:\n    mention = "B"\nelif note >= 12:\n    mention = "AB"\nelse:\n    mention = "Passable"\nprint(mention)`, question: "Quelle est la sortie ?", options: ["TB", "B", "AB", "Passable"], correct: 2, points: 1.75, difficulty: "Assez Difficile" },
+                { id: 75, code: `def test10(n, min_val, max_val):\n    return n >= min_val and n <= max_val\nprint(test10(15, 10, 20))`, question: "Quelle est la sortie ?", options: ["True", "False", "15", "None"], correct: 0, points: 2, difficulty: "Difficile" },
+                { id: 76, code: `for i in range(3):\n    print(i)\n    if i == 1:\n        break`, question: "Combien de nombres sont affichés ?", options: ["1", "2", "3", "0"], correct: 1, points: 1.75, difficulty: "Assez Difficile" },
+                { id: 77, code: `def test11(lst, facteur):\n    resultat = []\n    for val in lst:\n        resultat.append(val * facteur)\n    return resultat\nprint(test11([1, 2, 3], 2))`, question: "Quelle est la sortie ?", options: ["[1, 2, 3]", "[2, 4, 6]", "[3, 6, 9]", "6"], correct: 1, points: 2.5, difficulty: "Difficile" },
+                { id: 78, code: `x = 100\nwhile x >= 90:\n    x -= 3\nprint(x)`, question: "Quelle est la valeur finale de x ?", options: ["87", "88", "89", "90"], correct: 2, points: 2, difficulty: "Difficile" },
+                { id: 79, code: `def test12(texte):\n    voyelles = "aeiou"\n    count = 0\n    for char in texte.lower():\n        if char in voyelles:\n            count += 1\n    return count\nprint(test12("Python"))`, question: "Quelle est la sortie ?", options: ["1", "2", "3", "0"], correct: 1, points: 2.5, difficulty: "Difficile" },
+                { id: 80, code: `def test13(lst):\n    resultat = []\n    for i in range(len(lst) - 1, -1, -1):\n        resultat.append(lst[i])\n    return resultat\nprint(test13([1, 2, 3, 4]))`, question: "Quelle est la sortie ? (inversion de liste)", options: ["[1, 2, 3, 4]", "[4, 3, 2, 1]", "[4, 3, 2]", "Erreur"], correct: 1, points: 2.5, difficulty: "Difficile" },
             ]
         };
 
         function AdminDashboard() {
-            const [isAuthenticated, setIsAuthenticated] = useState(() => {
-                return localStorage.getItem('adminAuthenticated') === 'true';
-            });
-            const [loginInput, setLoginInput] = useState('');
-            const [passwordInput, setPasswordInput] = useState('');
+            const [isAuthenticated, setIsAuthenticated] = useState(false);
+            const [username, setUsername] = useState('');
+            const [password, setPassword] = useState('');
             const [results, setResults] = useState([]);
             const [activeSessions, setActiveSessions] = useState([]);
             const [selectedStudent, setSelectedStudent] = useState(null);
-            const [filter, setFilter] = useState('all');
-            const [classFilter, setClassFilter] = useState('all');
-            const [loading, setLoading] = useState(false);
-            const [showSessions, setShowSessions] = useState(false);
             const [showDetailedAnswers, setShowDetailedAnswers] = useState(false);
+            const [filterStatus, setFilterStatus] = useState('all');
+            const [filterClasse, setFilterClasse] = useState('all');
             const [sidebarOpen, setSidebarOpen] = useState(true);
-            const [stats, setStats] = useState(null);
 
             useEffect(() => {
                 if (isAuthenticated) {
-                    setLoading(true);
-                    const unsubscribe = db.collection('results')
+                    // Écoute en temps réel des résultats
+                    const unsubscribeResults = db.collection('results')
                         .orderBy('timestamp', 'desc')
-                        .onSnapshot((snapshot) => {
-                            const resultsData = snapshot.docs.map(doc => ({
+                        .onSnapshot(snapshot => {
+                            const data = snapshot.docs.map(doc => ({
                                 id: doc.id,
                                 ...doc.data()
                             }));
-                            setResults(resultsData);
-                            calculateStats(resultsData);
-                            setLoading(false);
-                        }, (error) => {
-                            console.error('Erreur Firebase:', error);
-                            setLoading(false);
+                            setResults(data);
                         });
 
-                    return () => unsubscribe();
-                }
-            }, [isAuthenticated]);
-
-            useEffect(() => {
-                if (isAuthenticated) {
-                    const unsubscribe = db.collection('quiz_sessions')
+                    // Écoute en temps réel des sessions actives
+                    const unsubscribeSessions = db.collection('quiz_sessions')
                         .where('status', 'in', ['started'])
-                        .onSnapshot((snapshot) => {
-                            const sessionsData = snapshot.docs.map(doc => ({
+                        .onSnapshot(snapshot => {
+                            const data = snapshot.docs.map(doc => ({
                                 id: doc.id,
                                 ...doc.data()
                             }));
-                            setActiveSessions(sessionsData);
+                            setActiveSessions(data);
                         });
 
-                    return () => unsubscribe();
+                    return () => {
+                        unsubscribeResults();
+                        unsubscribeSessions();
+                    };
                 }
             }, [isAuthenticated]);
-
-            const calculateStats = (data) => {
-                if (data.length === 0) return;
-                
-                const notes = data.map(r => parseFloat(r.note));
-                const moyenne = (notes.reduce((a, b) => a + b, 0) / notes.length).toFixed(2);
-                const noteMax = Math.max(...notes).toFixed(2);
-                const noteMin = Math.min(...notes).toFixed(2);
-                const tauxReussite = ((data.filter(r => parseFloat(r.note) >= 10).length / data.length) * 100).toFixed(2);
-                const totalTriche = data.reduce((sum, r) => sum + r.tentativesTriche, 0);
-
-                setStats({
-                    total: data.length,
-                    moyenne,
-                    noteMax,
-                    noteMin,
-                    tauxReussite,
-                    totalTriche,
-                    totalIAGE: data.filter(r => r.classe === 'L2-IAGE').length,
-                    totalGL: data.filter(r => r.classe === 'L2-GL').length,
-                    totalAdmis: data.filter(r => parseFloat(r.note) >= 10).length,
-                    totalEchec: data.filter(r => parseFloat(r.note) < 10).length
-                });
-            };
 
             const handleLogin = () => {
-                if (loginInput === ADMIN_CREDENTIALS.login && passwordInput === ADMIN_CREDENTIALS.password) {
+                if (username === ADMIN_CREDENTIALS.username && password === ADMIN_CREDENTIALS.password) {
                     setIsAuthenticated(true);
-                    localStorage.setItem('adminAuthenticated', 'true');
-                    
                     Swal.fire({
                         icon: 'success',
                         title: 'Connexion réussie',
@@ -258,188 +247,162 @@
                 } else {
                     Swal.fire({
                         icon: 'error',
-                        title: 'Échec de connexion',
-                        text: 'Identifiant ou mot de passe incorrect'
+                        title: 'Identifiants incorrects',
+                        text: 'Vérifiez votre nom d\'utilisateur et mot de passe'
                     });
                 }
             };
 
             const handleLogout = () => {
                 Swal.fire({
+                    icon: 'question',
                     title: 'Déconnexion',
                     text: 'Voulez-vous vraiment vous déconnecter ?',
-                    icon: 'question',
                     showCancelButton: true,
-                    confirmButtonText: 'Déconnexion',
+                    confirmButtonText: 'Oui',
                     cancelButtonText: 'Annuler'
                 }).then((result) => {
                     if (result.isConfirmed) {
                         setIsAuthenticated(false);
-                        localStorage.removeItem('adminAuthenticated');
-                        setResults([]);
-                        setStats(null);
+                        setUsername('');
+                        setPassword('');
                     }
                 });
             };
 
             const exportToCSV = () => {
-                if (results.length === 0) {
-                    Swal.fire({
-                        icon: 'info',
-                        title: 'Aucune donnée',
-                        text: 'Il n\'y a pas de résultats à exporter'
-                    });
-                    return;
-                }
+                const headers = ['Nom', 'Classe', 'Note/20', 'Pourcentage', 'Bonnes réponses', 'Total', 'Points', 'Max points', 'Triche', 'Pénalité', 'Date'];
+                const rows = results.map(r => [
+                    r.etudiant,
+                    r.classe,
+                    r.note,
+                    r.pourcentage + '%',
+                    r.correct,
+                    r.total,
+                    r.points,
+                    r.maxPoints,
+                    r.tentativesTriche,
+                    r.penalite || 0,
+                    r.dateTest
+                ]);
 
-                const csv = [
-                    ['Nom', 'Classe', 'Note/20', 'Pourcentage', 'Bonnes réponses', 'Total', 'Points', 'Max points', 'Triche', 'Pénalité', 'Date'],
-                    ...results.map(r => [
-                        r.etudiant,
-                        r.classe,
-                        r.note,
-                        r.pourcentage + '%',
-                        r.correct,
-                        r.total,
-                        r.points,
-                        r.maxPoints,
-                        r.tentativesTriche,
-                        r.penalite,
-                        r.dateTest
-                    ])
-                ].map(row => row.join(',')).join('\n');
-
-                const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' });
+                const csvContent = '\uFEFF' + [headers, ...rows].map(row => row.join(',')).join('\n');
+                const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+                const url = URL.createObjectURL(blob);
                 const link = document.createElement('a');
-                link.href = URL.createObjectURL(blob);
+                link.href = url;
                 link.download = `resultats_quiz_${new Date().toISOString().split('T')[0]}.csv`;
                 link.click();
-
-                Swal.fire({
-                    icon: 'success',
-                    title: 'Export réussi',
-                    text: `${results.length} résultats exportés`,
-                    timer: 2000,
-                    showConfirmButton: false
-                });
             };
 
-            const clearAllResults = () => {
-                Swal.fire({
-                    title: 'Confirmation',
+            const clearAllResults = async () => {
+                const result = await Swal.fire({
+                    icon: 'warning',
+                    title: 'Attention !',
                     html: `
                         <div class="text-center">
-                            <i class="fas fa-exclamation-triangle text-5xl text-red-500 mb-4"></i>
-                            <p class="text-xl font-semibold mb-2">Supprimer tous les résultats ?</p>
-                            <p class="text-gray-600 mb-2">Cette action est irréversible</p>
-                            <p class="text-sm text-gray-500">${results.length} résultats seront supprimés</p>
+                            <i class="fas fa-exclamation-triangle text-6xl text-orange-500 mb-4"></i>
+                            <p class="text-lg font-semibold mb-2">Êtes-vous sûr ?</p>
+                            <p class="text-gray-600">Cette action supprimera <strong>${results.length} résultats</strong></p>
+                            <p class="text-red-600 text-sm mt-2">Cette action est irréversible !</p>
                         </div>
                     `,
                     showCancelButton: true,
-                    confirmButtonText: 'Supprimer tout',
+                    confirmButtonText: 'Oui, supprimer tout',
                     cancelButtonText: 'Annuler',
-                    reverseButtons: true
-                }).then(async (result) => {
-                    if (result.isConfirmed) {
-                        try {
-                            const batch = db.batch();
-                            const snapshot = await db.collection('results').get();
-                            snapshot.docs.forEach(doc => {
-                                batch.delete(doc.ref);
-                            });
-                            await batch.commit();
-                            
-                            setResults([]);
-                            setStats(null);
-                            setSelectedStudent(null);
-                            
-                            Swal.fire({
-                                icon: 'success',
-                                title: 'Supprimé',
-                                text: 'Tous les résultats ont été supprimés',
-                                timer: 2000,
-                                showConfirmButton: false
-                            });
-                        } catch (error) {
-                            Swal.fire({
-                                icon: 'error',
-                                title: 'Erreur',
-                                text: 'Impossible de supprimer les résultats'
-                            });
-                        }
-                    }
+                    confirmButtonColor: '#ef4444'
                 });
-            };
 
-            const filterResults = () => {
-                let filtered = [...results];
-                
-                if (filter === 'passed') filtered = filtered.filter(r => parseFloat(r.note) >= 10);
-                else if (filter === 'failed') filtered = filtered.filter(r => parseFloat(r.note) < 10);
-                else if (filter === 'cheating') filtered = filtered.filter(r => r.tentativesTriche > 0);
-                
-                if (classFilter !== 'all') {
-                    filtered = filtered.filter(r => r.classe === classFilter);
+                if (result.isConfirmed) {
+                    try {
+                        const batch = db.batch();
+                        const snapshot = await db.collection('results').get();
+                        snapshot.docs.forEach(doc => {
+                            batch.delete(doc.ref);
+                        });
+                        await batch.commit();
+
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Supprimé !',
+                            text: 'Tous les résultats ont été effacés',
+                            timer: 2000,
+                            showConfirmButton: false
+                        });
+                    } catch (error) {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Erreur',
+                            text: 'Impossible de supprimer les résultats'
+                        });
+                    }
                 }
-                
-                return filtered;
             };
 
-            const filteredResults = filterResults();
+            const calculateStats = () => {
+                if (results.length === 0) return { total: 0, moyenne: 0, tauxReussite: 0, tentativesTriche: 0 };
+
+                const total = results.length;
+                const sommeNotes = results.reduce((acc, r) => acc + parseFloat(r.note), 0);
+                const moyenne = (sommeNotes / total).toFixed(2);
+                const admis = results.filter(r => parseFloat(r.note) >= 10).length;
+                const tauxReussite = ((admis / total) * 100).toFixed(2);
+                const tentativesTriche = results.reduce((acc, r) => acc + (r.tentativesTriche || 0), 0);
+
+                return { total, moyenne, tauxReussite, tentativesTriche };
+            };
+
+            const filteredResults = results.filter(r => {
+                const statusMatch = filterStatus === 'all' || 
+                    (filterStatus === 'admis' && parseFloat(r.note) >= 10) ||
+                    (filterStatus === 'echec' && parseFloat(r.note) < 10) ||
+                    (filterStatus === 'triche' && r.tentativesTriche > 0);
+                
+                const classeMatch = filterClasse === 'all' || r.classe === filterClasse;
+                
+                return statusMatch && classeMatch;
+            });
 
             // ÉCRAN DE CONNEXION
             if (!isAuthenticated) {
                 return (
-                    <div className="min-h-screen gradient-bg flex items-center justify-center p-4">
-                        <div className="animate-fadeIn glass-effect rounded-3xl shadow-2xl p-8 md:p-12 max-w-md w-full">
+                    <div className="gradient-bg min-h-screen flex items-center justify-center p-4">
+                        <div className="glass-effect rounded-3xl shadow-2xl p-8 md:p-12 max-w-md w-full">
                             <div className="text-center mb-8">
-                                <div className="inline-flex items-center justify-center w-20 h-20 bg-white bg-opacity-20 rounded-full mb-6">
-                                    <i className="fas fa-shield-alt text-4xl text-white"></i>
+                                <div className="inline-flex items-center justify-center w-24 h-24 bg-white bg-opacity-20 rounded-full mb-6 float-animation">
+                                    <i className="fas fa-shield-alt text-5xl text-white"></i>
                                 </div>
                                 <h1 className="text-4xl font-bold text-white mb-3">Administration</h1>
-                                <p className="text-white text-opacity-90 text-lg">Quiz Python ISI Keur Massar</p>
-                                <p className="text-white text-opacity-70">Tableau de bord sécurisé</p>
+                                <p className="text-white text-opacity-90 text-lg">Quiz Python - ISI Keur Massar</p>
                             </div>
 
-                            <div className="space-y-6">
+                            <div className="space-y-5">
                                 <div>
-                                    <label className="block text-sm font-semibold text-white text-opacity-90 mb-2">
-                                        <i className="fas fa-user mr-2"></i>
-                                        Identifiant
+                                    <label className="block text-white text-sm font-semibold mb-2">
+                                        <i className="fas fa-user mr-2"></i>Nom d'utilisateur
                                     </label>
-                                    <div className="relative">
-                                        <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                                            <i className="fas fa-user text-white text-opacity-50"></i>
-                                        </div>
-                                        <input
-                                            type="text"
-                                            value={loginInput}
-                                            onChange={(e) => setLoginInput(e.target.value)}
-                                            onKeyPress={(e) => e.key === 'Enter' && handleLogin()}
-                                            className="w-full pl-12 pr-4 py-4 bg-white bg-opacity-20 border-2 border-white border-opacity-30 rounded-xl text-white text-lg placeholder-white placeholder-opacity-60 focus:outline-none focus:border-opacity-60 transition"
-                                            placeholder="Votre identifiant"
-                                        />
-                                    </div>
+                                    <input
+                                        type="text"
+                                        value={username}
+                                        onChange={(e) => setUsername(e.target.value)}
+                                        onKeyPress={(e) => e.key === 'Enter' && handleLogin()}
+                                        className="w-full px-4 py-3 bg-white bg-opacity-20 border-2 border-white border-opacity-30 rounded-xl text-white placeholder-white placeholder-opacity-60 focus:outline-none focus:border-opacity-60 transition"
+                                        placeholder="Entrez votre identifiant"
+                                    />
                                 </div>
 
                                 <div>
-                                    <label className="block text-sm font-semibold text-white text-opacity-90 mb-2">
-                                        <i className="fas fa-key mr-2"></i>
-                                        Mot de passe
+                                    <label className="block text-white text-sm font-semibold mb-2">
+                                        <i className="fas fa-lock mr-2"></i>Mot de passe
                                     </label>
-                                    <div className="relative">
-                                        <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                                            <i className="fas fa-lock text-white text-opacity-50"></i>
-                                        </div>
-                                        <input
-                                            type="password"
-                                            value={passwordInput}
-                                            onChange={(e) => setPasswordInput(e.target.value)}
-                                            onKeyPress={(e) => e.key === 'Enter' && handleLogin()}
-                                            className="w-full pl-12 pr-4 py-4 bg-white bg-opacity-20 border-2 border-white border-opacity-30 rounded-xl text-white text-lg placeholder-white placeholder-opacity-60 focus:outline-none focus:border-opacity-60 transition"
-                                            placeholder="Votre mot de passe"
-                                        />
-                                    </div>
+                                    <input
+                                        type="password"
+                                        value={password}
+                                        onChange={(e) => setPassword(e.target.value)}
+                                        onKeyPress={(e) => e.key === 'Enter' && handleLogin()}
+                                        className="w-full px-4 py-3 bg-white bg-opacity-20 border-2 border-white border-opacity-30 rounded-xl text-white placeholder-white placeholder-opacity-60 focus:outline-none focus:border-opacity-60 transition"
+                                        placeholder="Entrez votre mot de passe"
+                                    />
                                 </div>
 
                                 <button
@@ -452,398 +415,279 @@
                             </div>
 
                             <div className="mt-8 pt-6 border-t border-white border-opacity-20 text-center">
-                                <p className="text-white text-opacity-70 text-sm flex items-center justify-center">
-                                    <i className="fas fa-lock mr-2"></i>
-                                    Accès réservé aux administrateurs
-                                </p>
+                                <a href="index.html" className="text-white text-opacity-70 hover:text-opacity-100 transition-colors inline-flex items-center">
+                                    <i className="fas fa-arrow-left mr-2"></i>
+                                    Retour au quiz
+                                </a>
                             </div>
                         </div>
                     </div>
                 );
             }
 
+            const stats = calculateStats();
+
             // TABLEAU DE BORD
             return (
                 <div className="flex min-h-screen bg-gray-50">
                     {/* SIDEBAR */}
-                    <div className={`${sidebarOpen ? 'w-64' : 'w-20'} bg-gradient-to-b from-indigo-800 via-purple-800 to-purple-900 text-white transition-all duration-300 shadow-2xl`}>
+                    <div className={`${sidebarOpen ? 'w-64' : 'w-20'} bg-gradient-to-b from-indigo-800 to-purple-900 text-white transition-all duration-300 fixed h-full z-10 shadow-2xl`}>
                         <div className="p-6">
                             <div className="flex items-center justify-between mb-8">
-                                {sidebarOpen ? (
-                                    <>
-                                        <div className="flex items-center space-x-3">
-                                            <div className="w-12 h-12 bg-white bg-opacity-20 rounded-xl flex items-center justify-center">
-                                                <i className="fas fa-chart-line text-white text-2xl"></i>
-                                            </div>
-                                            <div>
-                                                <h1 className="text-xl font-bold">Dashboard</h1>
-                                                <p className="text-xs text-white text-opacity-70">Admin Panel</p>
-                                            </div>
-                                        </div>
-                                        <button onClick={() => setSidebarOpen(false)} className="text-white hover:text-gray-300 transition">
-                                            <i className="fas fa-chevron-left"></i>
-                                        </button>
-                                    </>
-                                ) : (
-                                    <button onClick={() => setSidebarOpen(true)} className="w-full flex justify-center">
-                                        <i className="fas fa-chevron-right text-xl"></i>
-                                    </button>
+                                {sidebarOpen && (
+                                    <div>
+                                        <h2 className="text-2xl font-bold">Admin</h2>
+                                        <p className="text-white text-opacity-70 text-sm">ISI Keur Massar</p>
+                                    </div>
                                 )}
+                                <button 
+                                    onClick={() => setSidebarOpen(!sidebarOpen)}
+                                    className="p-2 hover:bg-white hover:bg-opacity-10 rounded-lg transition"
+                                >
+                                    <i className={`fas fa-${sidebarOpen ? 'times' : 'bars'} text-xl`}></i>
+                                </button>
                             </div>
 
                             <nav className="space-y-2">
-                                <div className={`p-3 rounded-xl flex items-center space-x-3 sidebar-hover cursor-pointer ${!showSessions ? 'bg-white bg-opacity-20' : ''}`}
-                                     onClick={() => setShowSessions(false)}>
-                                    <i className="fas fa-chart-bar text-lg"></i>
-                                    {sidebarOpen && <span className="font-medium">Statistiques</span>}
+                                <div className="px-4 py-3 bg-white bg-opacity-20 rounded-xl flex items-center space-x-3 cursor-pointer hover:bg-opacity-30 transition">
+                                    <i className="fas fa-chart-bar text-xl"></i>
+                                    {sidebarOpen && <span className="font-semibold">Statistiques</span>}
                                 </div>
-                                
-                                <div className={`p-3 rounded-xl flex items-center space-x-3 sidebar-hover cursor-pointer ${showSessions ? 'bg-white bg-opacity-20' : ''}`}
-                                     onClick={() => setShowSessions(true)}>
-                                    <i className="fas fa-play-circle text-lg"></i>
-                                    {sidebarOpen && (
-                                        <div className="flex items-center justify-between w-full">
-                                            <span className="font-medium">Sessions</span>
-                                            {activeSessions.length > 0 && (
-                                                <span className="bg-red-500 text-white text-xs rounded-full px-2 py-1 font-bold animate-pulse">
-                                                    {activeSessions.length}
-                                                </span>
-                                            )}
-                                        </div>
-                                    )}
+                                <div className="px-4 py-3 hover:bg-white hover:bg-opacity-10 rounded-xl flex items-center space-x-3 cursor-pointer transition">
+                                    <i className="fas fa-users text-xl"></i>
+                                    {sidebarOpen && <span>Sessions actives</span>}
                                 </div>
-
-                                <div className="p-3 rounded-xl flex items-center space-x-3 sidebar-hover cursor-pointer" onClick={exportToCSV}>
-                                    <i className="fas fa-file-export text-lg"></i>
-                                    {sidebarOpen && <span className="font-medium">Exporter CSV</span>}
+                                <div onClick={exportToCSV} className="px-4 py-3 hover:bg-white hover:bg-opacity-10 rounded-xl flex items-center space-x-3 cursor-pointer transition">
+                                    <i className="fas fa-file-export text-xl"></i>
+                                    {sidebarOpen && <span>Exporter CSV</span>}
                                 </div>
-
-                                <div className="p-3 rounded-xl flex items-center space-x-3 sidebar-hover cursor-pointer text-red-300 hover:bg-red-500 hover:bg-opacity-20" onClick={clearAllResults}>
-                                    <i className="fas fa-trash-alt text-lg"></i>
-                                    {sidebarOpen && <span className="font-medium">Effacer tout</span>}
+                                <div onClick={clearAllResults} className="px-4 py-3 hover:bg-white hover:bg-opacity-10 rounded-xl flex items-center space-x-3 cursor-pointer transition">
+                                    <i className="fas fa-trash text-xl"></i>
+                                    {sidebarOpen && <span>Effacer tout</span>}
                                 </div>
-
-                                <div className="p-3 rounded-xl flex items-center space-x-3 sidebar-hover cursor-pointer mt-8" onClick={handleLogout}>
-                                    <i className="fas fa-sign-out-alt text-lg"></i>
-                                    {sidebarOpen && <span className="font-medium">Déconnexion</span>}
+                                <div onClick={handleLogout} className="px-4 py-3 hover:bg-red-500 hover:bg-opacity-20 rounded-xl flex items-center space-x-3 cursor-pointer transition">
+                                    <i className="fas fa-sign-out-alt text-xl"></i>
+                                    {sidebarOpen && <span>Déconnexion</span>}
                                 </div>
                             </nav>
                         </div>
                     </div>
 
                     {/* CONTENU PRINCIPAL */}
-                    <div className="flex-1 overflow-x-hidden">
-                        {/* HEADER */}
-                        <header className="bg-white shadow-sm border-b sticky top-0 z-40">
-                            <div className="px-6 py-4">
-                                <div className="flex items-center justify-between">
-                                    <div>
-                                        <h2 className="text-2xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent flex items-center">
-                                            <i className="fas fa-tachometer-alt mr-3"></i>
-                                            Quiz Python - Administration
-                                        </h2>
-                                        <p className="text-gray-600 text-sm mt-1 flex items-center">
-                                            {loading ? (
-                                                <>
-                                                    <i className="fas fa-sync-alt mr-2 text-blue-500 animate-spin"></i>
-                                                    Synchronisation...
-                                                </>
-                                            ) : (
-                                                <>
-                                                    <div className="w-2 h-2 bg-green-500 rounded-full mr-2 animate-pulse"></div>
-                                                    Données en temps réel
-                                                </>
-                                            )}
-                                        </p>
-                                    </div>
-                                    <div className="flex items-center space-x-4">
-                                        <div className="bg-gradient-to-r from-indigo-50 to-purple-50 rounded-xl px-6 py-3 border-2 border-indigo-200">
-                                            <div className="flex items-center space-x-3">
-                                                <i className="fas fa-users text-indigo-600 text-xl"></i>
-                                                <div>
-                                                    <div className="text-2xl font-bold text-indigo-700">{results.length}</div>
-                                                    <div className="text-xs text-gray-600">Étudiants</div>
-                                                </div>
-                                            </div>
+                    <div className={`flex-1 ${sidebarOpen ? 'ml-64' : 'ml-20'} transition-all duration-300`}>
+                        <main className="p-8">
+                            {/* HEADER */}
+                            <div className="mb-8">
+                                <h1 className="text-4xl font-bold text-gray-800 mb-2">Tableau de Bord</h1>
+                                <p className="text-gray-600">Gestion des résultats du quiz Python</p>
+                            </div>
+
+                            {/* STATISTIQUES PRINCIPALES */}
+                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                                <div className="bg-white rounded-2xl shadow-lg p-6 hover:shadow-xl transition-all transform hover:-translate-y-1">
+                                    <div className="flex items-center justify-between mb-4">
+                                        <div className="w-14 h-14 bg-gradient-to-br from-blue-400 to-blue-600 rounded-xl flex items-center justify-center shadow-lg">
+                                            <i className="fas fa-users text-2xl text-white"></i>
                                         </div>
-                                        <div className="text-sm text-gray-500">
-                                            <i className="far fa-clock mr-1"></i>
-                                            {new Date().toLocaleTimeString('fr-FR')}
+                                        <span className="text-3xl font-bold text-gray-800">{stats.total}</span>
+                                    </div>
+                                    <h3 className="text-gray-600 font-semibold">Total Étudiants</h3>
+                                </div>
+
+                                <div className="bg-white rounded-2xl shadow-lg p-6 hover:shadow-xl transition-all transform hover:-translate-y-1">
+                                    <div className="flex items-center justify-between mb-4">
+                                        <div className="w-14 h-14 bg-gradient-to-br from-green-400 to-green-600 rounded-xl flex items-center justify-center shadow-lg">
+                                            <i className="fas fa-chart-line text-2xl text-white"></i>
+                                        </div>
+                                        <span className="text-3xl font-bold text-gray-800">{stats.moyenne}</span>
+                                    </div>
+                                    <h3 className="text-gray-600 font-semibold">Moyenne Générale</h3>
+                                </div>
+
+                                <div className="bg-white rounded-2xl shadow-lg p-6 hover:shadow-xl transition-all transform hover:-translate-y-1">
+                                    <div className="flex items-center justify-between mb-4">
+                                        <div className="w-14 h-14 bg-gradient-to-br from-purple-400 to-purple-600 rounded-xl flex items-center justify-center shadow-lg">
+                                            <i className="fas fa-percentage text-2xl text-white"></i>
+                                        </div>
+                                        <span className="text-3xl font-bold text-gray-800">{stats.tauxReussite}%</span>
+                                    </div>
+                                    <h3 className="text-gray-600 font-semibold">Taux de Réussite</h3>
+                                </div>
+
+                                <div className="bg-white rounded-2xl shadow-lg p-6 hover:shadow-xl transition-all transform hover:-translate-y-1">
+                                    <div className="flex items-center justify-between mb-4">
+                                        <div className="w-14 h-14 bg-gradient-to-br from-red-400 to-red-600 rounded-xl flex items-center justify-center shadow-lg">
+                                            <i className="fas fa-exclamation-triangle text-2xl text-white"></i>
+                                        </div>
+                                        <span className="text-3xl font-bold text-gray-800">{stats.tentativesTriche}</span>
+                                    </div>
+                                    <h3 className="text-gray-600 font-semibold">Tentatives Triche</h3>
+                                </div>
+                            </div>
+
+                            {/* STATISTIQUES DÉTAILLÉES */}
+                            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+                                <div className="bg-white rounded-2xl shadow-lg p-6">
+                                    <h3 className="text-lg font-bold text-gray-800 mb-4 flex items-center">
+                                        <i className="fas fa-graduation-cap mr-2 text-indigo-500"></i>
+                                        Répartition par Classe
+                                    </h3>
+                                    <div className="space-y-3">
+                                        <div className="flex justify-between items-center">
+                                            <span className="text-gray-600">L2-IAGE</span>
+                                            <span className="font-bold text-blue-600">{results.filter(r => r.classe === 'L2-IAGE').length}</span>
+                                        </div>
+                                        <div className="flex justify-between items-center">
+                                            <span className="text-gray-600">L2-GL</span>
+                                            <span className="font-bold text-teal-600">{results.filter(r => r.classe === 'L2-GL').length}</span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div className="bg-white rounded-2xl shadow-lg p-6">
+                                    <h3 className="text-lg font-bold text-gray-800 mb-4 flex items-center">
+                                        <i className="fas fa-trophy mr-2 text-yellow-500"></i>
+                                        Résultats
+                                    </h3>
+                                    <div className="space-y-3">
+                                        <div className="flex justify-between items-center">
+                                            <span className="text-gray-600">Admis (≥10)</span>
+                                            <span className="font-bold text-green-600">{results.filter(r => parseFloat(r.note) >= 10).length}</span>
+                                        </div>
+                                        <div className="flex justify-between items-center">
+                                            <span className="text-gray-600">Échec (&lt;10)</span>
+                                            <span className="font-bold text-red-600">{results.filter(r => parseFloat(r.note) < 10).length}</span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div className="bg-white rounded-2xl shadow-lg p-6">
+                                    <h3 className="text-lg font-bold text-gray-800 mb-4 flex items-center">
+                                        <i className="fas fa-star mr-2 text-purple-500"></i>
+                                        Performances
+                                    </h3>
+                                    <div className="space-y-3">
+                                        <div className="flex justify-between items-center">
+                                            <span className="text-gray-600">Note max</span>
+                                            <span className="font-bold text-green-600">
+                                                {results.length > 0 ? Math.max(...results.map(r => parseFloat(r.note))).toFixed(2) : '0'}/20
+                                            </span>
+                                        </div>
+                                        <div className="flex justify-between items-center">
+                                            <span className="text-gray-600">Note min</span>
+                                            <span className="font-bold text-red-600">
+                                                {results.length > 0 ? Math.min(...results.map(r => parseFloat(r.note))).toFixed(2) : '0'}/20
+                                            </span>
                                         </div>
                                     </div>
                                 </div>
                             </div>
-                        </header>
 
-                        <main className="p-6">
                             {/* SESSIONS ACTIVES */}
-                            {showSessions && activeSessions.length > 0 && (
-                                <div className="mb-6 animate-fadeIn">
-                                    <div className="bg-gradient-to-r from-green-50 to-emerald-50 rounded-2xl shadow-xl p-6 border-2 border-green-200">
-                                        <div className="flex items-center justify-between mb-6">
-                                            <div className="flex items-center space-x-4">
-                                                <div className="w-14 h-14 bg-green-100 rounded-xl flex items-center justify-center shadow-lg">
-                                                    <i className="fas fa-play-circle text-3xl text-green-600"></i>
-                                                </div>
-                                                <div>
-                                                    <h3 className="text-2xl font-bold text-gray-800">Quiz en cours</h3>
-                                                    <p className="text-gray-600">{activeSessions.length} session(s) active(s)</p>
-                                                </div>
-                                            </div>
-                                            <div className="flex items-center space-x-2 bg-green-100 px-4 py-2 rounded-full">
-                                                <div className="w-3 h-3 bg-green-500 rounded-full animate-pulse"></div>
-                                                <span className="text-sm font-bold text-green-700">EN DIRECT</span>
-                                            </div>
-                                        </div>
-                                        
-                                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                                            {activeSessions.map(session => (
-                                                <div key={session.id} className="bg-white rounded-xl border-2 border-green-200 p-5 hover:shadow-lg transition-all">
-                                                    <div className="flex justify-between items-start mb-3">
-                                                        <div>
-                                                            <h4 className="font-bold text-gray-800 text-lg">{session.etudiant}</h4>
-                                                            <p className="text-sm text-gray-600 flex items-center mt-1">
-                                                                <i className="fas fa-graduation-cap mr-2"></i>
-                                                                {session.classe}
-                                                            </p>
-                                                        </div>
-                                                        {session.tabSwitches > 0 && (
-                                                            <span className="bg-red-100 text-red-800 text-xs font-bold px-3 py-1 rounded-full flex items-center">
-                                                                <i className="fas fa-exclamation-triangle mr-1"></i>
-                                                                {session.tabSwitches}
-                                                            </span>
-                                                        )}
+                            {activeSessions.length > 0 && (
+                                <div className="bg-gradient-to-r from-green-50 to-emerald-50 rounded-2xl shadow-lg p-6 mb-8 border-2 border-green-200">
+                                    <h3 className="text-xl font-bold text-gray-800 mb-4 flex items-center">
+                                        <span className="relative flex h-3 w-3 mr-3">
+                                            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+                                            <span className="relative inline-flex rounded-full h-3 w-3 bg-green-500"></span>
+                                        </span>
+                                        Sessions en cours ({activeSessions.length})
+                                        <span className="ml-3 text-sm bg-green-500 text-white px-3 py-1 rounded-full">EN DIRECT</span>
+                                    </h3>
+                                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                                        {activeSessions.map(session => (
+                                            <div key={session.id} className="bg-white rounded-xl p-4 shadow border-l-4 border-green-500">
+                                                <div className="flex items-center mb-2">
+                                                    <div className="w-10 h-10 bg-gradient-to-br from-green-400 to-emerald-500 rounded-full flex items-center justify-center mr-3">
+                                                        <i className="fas fa-user text-white"></i>
                                                     </div>
-                                                    <div className="flex items-center justify-between text-sm pt-3 border-t border-gray-200">
-                                                        <span className="text-gray-600 flex items-center">
-                                                            <i className="far fa-question-circle mr-2"></i>
-                                                            Q {session.currentQuestion || 0}/50
-                                                        </span>
-                                                        <span className="text-indigo-600 font-semibold flex items-center">
-                                                            <i className="far fa-clock mr-1"></i>
-                                                            En cours
-                                                        </span>
+                                                    <div>
+                                                        <p className="font-bold text-gray-800">{session.etudiant}</p>
+                                                        <p className="text-sm text-gray-600">{session.classe}</p>
                                                     </div>
                                                 </div>
-                                            ))}
-                                        </div>
-                                    </div>
-                                </div>
-                            )}
-
-                            {/* STATISTIQUES */}
-                            {!showSessions && stats && (
-                                <div className="mb-6 animate-fadeIn space-y-6">
-                                    {/* Cartes statistiques principales */}
-                                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                                        <div className="bg-white rounded-2xl shadow-xl p-6 border-2 border-blue-100 hover:shadow-2xl transition-all">
-                                            <div className="flex items-center justify-between mb-4">
-                                                <div className="w-14 h-14 bg-gradient-to-br from-blue-400 to-blue-600 rounded-xl flex items-center justify-center shadow-lg">
-                                                    <i className="fas fa-users text-3xl text-white"></i>
+                                                <div className="flex justify-between text-sm">
+                                                    <span className="text-gray-600">Question {session.currentQuestion}/80</span>
+                                                    {session.tabSwitches > 0 && (
+                                                        <span className="bg-red-100 text-red-600 px-2 py-1 rounded-full text-xs font-bold">
+                                                            {session.tabSwitches} ⚠️
+                                                        </span>
+                                                    )}
                                                 </div>
-                                                <span className="text-4xl font-bold text-blue-600">{stats.total}</span>
-                                            </div>
-                                            <h3 className="text-lg font-bold text-gray-800 mb-1">Total Étudiants</h3>
-                                            <p className="text-gray-600 text-sm">Tous les participants</p>
-                                        </div>
-
-                                        <div className="bg-white rounded-2xl shadow-xl p-6 border-2 border-green-100 hover:shadow-2xl transition-all">
-                                            <div className="flex items-center justify-between mb-4">
-                                                <div className="w-14 h-14 bg-gradient-to-br from-green-400 to-green-600 rounded-xl flex items-center justify-center shadow-lg">
-                                                    <i className="fas fa-chart-line text-3xl text-white"></i>
-                                                </div>
-                                                <div className="text-right">
-                                                    <div className="text-4xl font-bold text-green-600">{stats.moyenne}</div>
-                                                    <div className="text-gray-500 text-sm">/20</div>
-                                                </div>
-                                            </div>
-                                            <h3 className="text-lg font-bold text-gray-800 mb-1">Moyenne Générale</h3>
-                                            <p className="text-gray-600 text-sm">Score moyen</p>
-                                        </div>
-
-                                        <div className="bg-white rounded-2xl shadow-xl p-6 border-2 border-purple-100 hover:shadow-2xl transition-all">
-                                            <div className="flex items-center justify-between mb-4">
-                                                <div className="w-14 h-14 bg-gradient-to-br from-purple-400 to-purple-600 rounded-xl flex items-center justify-center shadow-lg">
-                                                    <i className="fas fa-trophy text-3xl text-white"></i>
-                                                </div>
-                                                <div className="text-right">
-                                                    <div className="text-4xl font-bold text-purple-600">{stats.tauxReussite}</div>
-                                                    <div className="text-gray-500 text-sm">%</div>
-                                                </div>
-                                            </div>
-                                            <h3 className="text-lg font-bold text-gray-800 mb-1">Taux de Réussite</h3>
-                                            <p className="text-gray-600 text-sm">{stats.totalAdmis} admis</p>
-                                        </div>
-
-                                        <div className="bg-white rounded-2xl shadow-xl p-6 border-2 border-red-100 hover:shadow-2xl transition-all">
-                                            <div className="flex items-center justify-between mb-4">
-                                                <div className="w-14 h-14 bg-gradient-to-br from-red-400 to-red-600 rounded-xl flex items-center justify-center shadow-lg">
-                                                    <i className="fas fa-exclamation-triangle text-3xl text-white"></i>
-                                                </div>
-                                                <span className="text-4xl font-bold text-red-600">{stats.totalTriche}</span>
-                                            </div>
-                                            <h3 className="text-lg font-bold text-gray-800 mb-1">Tentatives Triche</h3>
-                                            <p className="text-gray-600 text-sm">Changements détectés</p>
-                                        </div>
-                                    </div>
-
-                                    {/* Détails statistiques */}
-                                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                                        <div className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-2xl p-6 border-2 border-blue-200">
-                                            <h4 className="font-bold text-gray-800 mb-4 flex items-center text-lg">
-                                                <i className="fas fa-user-graduate mr-3 text-blue-600 text-xl"></i>
-                                                Répartition par Classe
-                                            </h4>
-                                            <div className="space-y-3">
-                                                <div className="flex justify-between items-center bg-white rounded-lg p-3">
-                                                    <span className="text-gray-700 font-medium">L2-IAGE</span>
-                                                    <span className="font-bold text-blue-600 text-xl">{stats.totalIAGE}</span>
-                                                </div>
-                                                <div className="flex justify-between items-center bg-white rounded-lg p-3">
-                                                    <span className="text-gray-700 font-medium">L2-GL</span>
-                                                    <span className="font-bold text-teal-600 text-xl">{stats.totalGL}</span>
-                                                </div>
-                                            </div>
-                                        </div>
-
-                                        <div className="bg-gradient-to-br from-green-50 to-emerald-50 rounded-2xl p-6 border-2 border-green-200">
-                                            <h4 className="font-bold text-gray-800 mb-4 flex items-center text-lg">
-                                                <i className="fas fa-chart-pie mr-3 text-green-600 text-xl"></i>
-                                                Résultats
-                                            </h4>
-                                            <div className="space-y-3">
-                                                <div className="flex justify-between items-center bg-white rounded-lg p-3">
-                                                    <span className="text-gray-700 font-medium flex items-center">
-                                                        <i className="fas fa-check-circle text-green-500 mr-2"></i>
-                                                        Admis
+                                                <div className="mt-2">
+                                                    <span className="inline-flex items-center text-xs text-green-600 font-semibold">
+                                                        <span className="pulse-dot w-2 h-2 bg-green-500 rounded-full mr-2"></span>
+                                                        En cours
                                                     </span>
-                                                    <span className="font-bold text-green-600 text-xl">{stats.totalAdmis}</span>
-                                                </div>
-                                                <div className="flex justify-between items-center bg-white rounded-lg p-3">
-                                                    <span className="text-gray-700 font-medium flex items-center">
-                                                        <i className="fas fa-times-circle text-red-500 mr-2"></i>
-                                                        Échec
-                                                    </span>
-                                                    <span className="font-bold text-red-600 text-xl">{stats.totalEchec}</span>
                                                 </div>
                                             </div>
-                                        </div>
-
-                                        <div className="bg-gradient-to-br from-purple-50 to-pink-50 rounded-2xl p-6 border-2 border-purple-200">
-                                            <h4 className="font-bold text-gray-800 mb-4 flex items-center text-lg">
-                                                <i className="fas fa-star mr-3 text-purple-600 text-xl"></i>
-                                                Performances
-                                            </h4>
-                                            <div className="space-y-3">
-                                                <div className="flex justify-between items-center bg-white rounded-lg p-3">
-                                                    <span className="text-gray-700 font-medium">Note max</span>
-                                                    <span className="font-bold text-purple-600 text-xl">{stats.noteMax}/20</span>
-                                                </div>
-                                                <div className="flex justify-between items-center bg-white rounded-lg p-3">
-                                                    <span className="text-gray-700 font-medium">Note min</span>
-                                                    <span className="font-bold text-orange-600 text-xl">{stats.noteMin}/20</span>
-                                                </div>
-                                            </div>
-                                        </div>
+                                        ))}
                                     </div>
                                 </div>
                             )}
 
                             {/* FILTRES */}
-                            <div className="bg-white rounded-2xl shadow-xl p-6 mb-6 animate-fadeIn border">
-                                <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
+                            <div className="bg-white rounded-2xl shadow-lg p-6 mb-6">
+                                <h3 className="text-lg font-bold text-gray-800 mb-4">Filtres</h3>
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                     <div>
-                                        <h3 className="text-2xl font-bold text-gray-800 mb-2 flex items-center">
-                                            <i className="fas fa-filter mr-3 text-indigo-500"></i>
-                                            Filtrer les Résultats
-                                        </h3>
-                                        <p className="text-gray-600">Affinez l'affichage selon vos critères</p>
-                                    </div>
-                                    <div className="flex items-center space-x-3 bg-indigo-50 px-4 py-2 rounded-xl">
-                                        <span className="text-sm font-semibold text-gray-700">{filteredResults.length} résultat(s)</span>
-                                        <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
-                                    </div>
-                                </div>
-
-                                <div className="space-y-6">
-                                    <div>
-                                        <h4 className="text-sm font-bold text-gray-700 mb-3 flex items-center">
-                                            <i className="fas fa-chart-pie mr-2 text-indigo-500"></i>
-                                            Par statut
-                                        </h4>
-                                        <div className="flex flex-wrap gap-3">
-                                            <button onClick={() => setFilter('all')} 
-                                                    className={`px-6 py-3 rounded-xl font-semibold transition-all transform hover:scale-105 ${filter === 'all' ? 'bg-gradient-to-r from-indigo-500 to-purple-600 text-white shadow-lg' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}`}>
-                                                <i className="fas fa-list mr-2"></i>
-                                                Tous ({results.length})
-                                            </button>
-                                            <button onClick={() => setFilter('passed')} 
-                                                    className={`px-6 py-3 rounded-xl font-semibold transition-all transform hover:scale-105 ${filter === 'passed' ? 'bg-gradient-to-r from-green-500 to-emerald-600 text-white shadow-lg' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}`}>
-                                                <i className="fas fa-check-circle mr-2"></i>
-                                                Admis ({results.filter(r => parseFloat(r.note) >= 10).length})
-                                            </button>
-                                            <button onClick={() => setFilter('failed')} 
-                                                    className={`px-6 py-3 rounded-xl font-semibold transition-all transform hover:scale-105 ${filter === 'failed' ? 'bg-gradient-to-r from-red-500 to-orange-600 text-white shadow-lg' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}`}>
-                                                <i className="fas fa-times-circle mr-2"></i>
-                                                Échec ({results.filter(r => parseFloat(r.note) < 10).length})
-                                            </button>
-                                            <button onClick={() => setFilter('cheating')} 
-                                                    className={`px-6 py-3 rounded-xl font-semibold transition-all transform hover:scale-105 ${filter === 'cheating' ? 'bg-gradient-to-r from-orange-500 to-yellow-600 text-white shadow-lg' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}`}>
-                                                <i className="fas fa-exclamation-triangle mr-2"></i>
-                                                Triche ({results.filter(r => r.tentativesTriche > 0).length})
-                                            </button>
+                                        <label className="block text-sm font-semibold text-gray-700 mb-2">Par Statut</label>
+                                        <div className="flex flex-wrap gap-2">
+                                            {['all', 'admis', 'echec', 'triche'].map(status => (
+                                                <button
+                                                    key={status}
+                                                    onClick={() => setFilterStatus(status)}
+                                                    className={`px-4 py-2 rounded-xl font-semibold transition-all ${
+                                                        filterStatus === status
+                                                            ? 'bg-gradient-to-r from-indigo-500 to-purple-600 text-white shadow-lg'
+                                                            : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                                                    }`}
+                                                >
+                                                    {status === 'all' ? 'Tous' : status === 'admis' ? 'Admis' : status === 'echec' ? 'Échec' : 'Triche'}
+                                                </button>
+                                            ))}
                                         </div>
                                     </div>
-
                                     <div>
-                                        <h4 className="text-sm font-bold text-gray-700 mb-3 flex items-center">
-                                            <i className="fas fa-graduation-cap mr-2 text-indigo-500"></i>
-                                            Par classe
-                                        </h4>
-                                        <div className="flex flex-wrap gap-3">
-                                            <button onClick={() => setClassFilter('all')} 
-                                                    className={`px-6 py-3 rounded-xl font-semibold transition-all transform hover:scale-105 ${classFilter === 'all' ? 'bg-gradient-to-r from-purple-500 to-pink-600 text-white shadow-lg' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}`}>
-                                                Toutes ({results.length})
-                                            </button>
-                                            <button onClick={() => setClassFilter('L2-IAGE')} 
-                                                    className={`px-6 py-3 rounded-xl font-semibold transition-all transform hover:scale-105 ${classFilter === 'L2-IAGE' ? 'bg-gradient-to-r from-blue-500 to-cyan-600 text-white shadow-lg' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}`}>
-                                                L2-IAGE ({results.filter(r => r.classe === 'L2-IAGE').length})
-                                            </button>
-                                            <button onClick={() => setClassFilter('L2-GL')} 
-                                                    className={`px-6 py-3 rounded-xl font-semibold transition-all transform hover:scale-105 ${classFilter === 'L2-GL' ? 'bg-gradient-to-r from-teal-500 to-green-600 text-white shadow-lg' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}`}>
-                                                L2-GL ({results.filter(r => r.classe === 'L2-GL').length})
-                                            </button>
+                                        <label className="block text-sm font-semibold text-gray-700 mb-2">Par Classe</label>
+                                        <div className="flex flex-wrap gap-2">
+                                            {['all', 'L2-IAGE', 'L2-GL'].map(classe => (
+                                                <button
+                                                    key={classe}
+                                                    onClick={() => setFilterClasse(classe)}
+                                                    className={`px-4 py-2 rounded-xl font-semibold transition-all ${
+                                                        filterClasse === classe
+                                                            ? 'bg-gradient-to-r from-indigo-500 to-purple-600 text-white shadow-lg'
+                                                            : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                                                    }`}
+                                                >
+                                                    {classe === 'all' ? 'Toutes' : classe}
+                                                </button>
+                                            ))}
                                         </div>
                                     </div>
                                 </div>
                             </div>
 
                             {/* TABLEAU DES RÉSULTATS */}
-                            <div className="bg-white rounded-2xl shadow-xl overflow-hidden animate-fadeIn border">
-                                <div className="px-6 py-5 border-b border-gray-200 bg-gradient-to-r from-indigo-50 to-purple-50">
-                                    <div className="flex items-center justify-between">
-                                        <h3 className="text-2xl font-bold text-gray-800 flex items-center">
-                                            <i className="fas fa-table mr-3 text-indigo-600"></i>
-                                            Résultats Détaillés
-                                        </h3>
-                                        <button onClick={exportToCSV} 
-                                                className="px-6 py-3 bg-gradient-to-r from-green-500 to-emerald-600 text-white rounded-xl font-semibold hover:from-green-600 hover:to-emerald-700 transition-all shadow-lg flex items-center">
-                                            <i className="fas fa-download mr-2"></i>
-                                            Exporter CSV
-                                        </button>
-                                    </div>
+                            <div className="bg-white rounded-2xl shadow-lg overflow-hidden">
+                                <div className="p-6 bg-gradient-to-r from-indigo-500 to-purple-600">
+                                    <h3 className="text-2xl font-bold text-white flex items-center">
+                                        <i className="fas fa-table mr-3"></i>
+                                        Résultats des Étudiants ({filteredResults.length})
+                                    </h3>
                                 </div>
 
                                 {filteredResults.length === 0 ? (
-                                    <div className="text-center py-16">
+                                    <div className="p-12 text-center">
                                         <i className="fas fa-inbox text-6xl text-gray-300 mb-4"></i>
-                                        <p className="text-gray-500 text-xl font-semibold">Aucun résultat à afficher</p>
-                                        <p className="text-gray-400 text-sm mt-2">Les résultats apparaîtront ici en temps réel</p>
+                                        <p className="text-xl text-gray-500 font-semibold">Aucun résultat disponible</p>
+                                        <p className="text-gray-400 mt-2">Les résultats apparaîtront ici après la soumission des quiz</p>
                                     </div>
                                 ) : (
                                     <div className="overflow-x-auto">
                                         <table className="w-full">
-                                            <thead className="bg-gray-50">
+                                            <thead className="bg-gray-50 sticky top-0">
                                                 <tr>
                                                     <th className="px-6 py-4 text-left text-xs font-bold text-gray-600 uppercase tracking-wider">
                                                         <i className="fas fa-user mr-2"></i>Étudiant
@@ -1026,9 +870,12 @@
                                                                                 {q && (
                                                                                     <>
                                                                                         <p className="text-sm text-gray-700 mb-2">{q.question}</p>
+                                                                                        <div className="bg-gray-900 rounded-lg p-3 mb-2">
+                                                                                            <pre className="text-green-400 text-xs overflow-x-auto">{q.code}</pre>
+                                                                                        </div>
                                                                                         <div className="text-sm text-green-600 flex items-center">
                                                                                             <i className="fas fa-check mr-2"></i>
-                                                                                            <span><strong>Réponse :</strong> {q.options[detail.reponse]}</span>
+                                                                                            <span><strong>Votre réponse :</strong> {detail.reponseText}</span>
                                                                                         </div>
                                                                                     </>
                                                                                 )}
@@ -1060,14 +907,17 @@
                                                                                 {q && (
                                                                                     <>
                                                                                         <p className="text-sm text-gray-700 mb-3">{q.question}</p>
+                                                                                        <div className="bg-gray-900 rounded-lg p-3 mb-3">
+                                                                                            <pre className="text-green-400 text-xs overflow-x-auto">{q.code}</pre>
+                                                                                        </div>
                                                                                         <div className="space-y-2 text-sm">
                                                                                             <div className="flex items-center text-red-600">
                                                                                                 <i className="fas fa-times mr-2"></i>
-                                                                                                <span><strong>Votre réponse :</strong> {q.options[detail.reponse]}</span>
+                                                                                                <span><strong>Votre réponse :</strong> {detail.reponseText}</span>
                                                                                             </div>
                                                                                             <div className="flex items-center text-green-600">
                                                                                                 <i className="fas fa-check mr-2"></i>
-                                                                                                <span><strong>Bonne réponse :</strong> {q.options[detail.correct]}</span>
+                                                                                                <span><strong>Bonne réponse :</strong> {detail.correctText}</span>
                                                                                             </div>
                                                                                         </div>
                                                                                     </>
@@ -1100,9 +950,12 @@
                                                                                 {q && (
                                                                                     <>
                                                                                         <p className="text-sm text-gray-700 mb-2">{q.question}</p>
+                                                                                        <div className="bg-gray-900 rounded-lg p-3 mb-2">
+                                                                                            <pre className="text-green-400 text-xs overflow-x-auto">{q.code}</pre>
+                                                                                        </div>
                                                                                         <div className="text-sm text-green-600 flex items-center">
                                                                                             <i className="fas fa-check mr-2"></i>
-                                                                                            <span><strong>Bonne réponse :</strong> {q.options[detail.correct]}</span>
+                                                                                            <span><strong>Bonne réponse :</strong> {detail.correctText}</span>
                                                                                         </div>
                                                                                     </>
                                                                                 )}
@@ -1159,4 +1012,3 @@
     </script>
 </body>
 </html>
-
