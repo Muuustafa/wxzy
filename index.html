@@ -113,9 +113,10 @@
 
         const QUIZ_CONFIG = {
             title: "Quiz Python - Licence 2 ISI Keur Massar",
-            duration: 1800,
+            duration: 1800, // 30 minutes pour 80 questions
             penaltyPerWarning: 2,
             questions: [
+                // QUESTIONS 1-50 (ORIGINALES)
                 { id: 1, code: `x = int(4.9)\nprint(x)`, question: "Quelle est la sortie ? (conversion float vers int)", options: ["4.9", "4", "5", "Erreur"], correct: 1, points: 1, difficulty: "Facile" },
                 { id: 2, code: `texte = "Python"\nprint(len(texte))`, question: "Quelle est la longueur de la chaîne ?", options: ["5", "6", "7", "Erreur"], correct: 1, points: 1, difficulty: "Facile" },
                 { id: 3, code: `x = True\nprint(int(x))`, question: "Que retourne int(True) ?", options: ["True", "1", "0", "Erreur"], correct: 1, points: 1, difficulty: "Facile" },
@@ -166,6 +167,38 @@
                 { id: 48, code: `x = "ingenieur logiciel"\ny = x.replace("logiciel", "civil")\nprint(y)`, question: "Quelle est la chaîne finale ?", options: ["ingenieur logiciel", "ingenieur civil", "civil logiciel", "Erreur"], correct: 1, points: 2, difficulty: "Difficile" },
                 { id: 49, code: `x = [1, 2, 3]\ny = x[:]\ny.append(4)\nprint(len(x))`, question: "Quelle est la longueur de x ? (copie superficielle)", options: ["3", "4", "7", "Erreur"], correct: 0, points: 2, difficulty: "Difficile" },
                 { id: 50, code: `nombres = [10, 20, 30]\nsomme = sum(nombres)\nmoyenne = somme / len(nombres)\nprint(int(moyenne))`, question: "Quelle est la moyenne convertie en entier ?", options: ["10", "15", "20", "60"], correct: 2, points: 2, difficulty: "Difficile" },
+                
+                // NOUVELLES QUESTIONS 51-80 (IF/ELSE, BOUCLES, FONCTIONS)
+                { id: 51, code: `x = 7\nif x > 5:\n    print("A")\nelse:\n    print("B")`, question: "Quelle est la sortie ?", options: ["A", "B", "AB", "Rien"], correct: 0, points: 1.5, difficulty: "Moyen" },
+                { id: 52, code: `n = 10\nif n % 2 == 0 and n > 5:\n    print("Oui")\nelse:\n    print("Non")`, question: "Quelle est la sortie ?", options: ["Oui", "Non", "True", "False"], correct: 0, points: 1.5, difficulty: "Moyen" },
+                { id: 53, code: `age = 17\nif age >= 18:\n    print("Majeur")\nelif age >= 13:\n    print("Ado")\nelse:\n    print("Enfant")`, question: "Quelle est la sortie ?", options: ["Majeur", "Ado", "Enfant", "Erreur"], correct: 1, points: 1.75, difficulty: "Assez Difficile" },
+                { id: 54, code: `x = 0\nfor i in range(1, 6):\n    x += i\nprint(x)`, question: "Quelle est la valeur finale de x ?", options: ["10", "15", "21", "6"], correct: 1, points: 1.75, difficulty: "Assez Difficile" },
+                { id: 55, code: `compteur = 0\nfor i in range(10):\n    if i > 5:\n        compteur += 1\nprint(compteur)`, question: "Combien de fois la condition est vraie ?", options: ["3", "4", "5", "6"], correct: 1, points: 1.75, difficulty: "Assez Difficile" },
+                { id: 56, code: `resultat = 1\nfor i in range(1, 5):\n    resultat *= i\nprint(resultat)`, question: "Quelle est la valeur de resultat ? (factorielle de 4)", options: ["10", "20", "24", "120"], correct: 2, points: 2, difficulty: "Difficile" },
+                { id: 57, code: `i = 1\nwhile i <= 5:\n    i += 1\nprint(i)`, question: "Quelle est la valeur finale de i ?", options: ["5", "6", "4", "Boucle infinie"], correct: 1, points: 1.75, difficulty: "Assez Difficile" },
+                { id: 58, code: `x = 0\ni = 0\nwhile i < 4:\n    x += i\n    i += 1\nprint(x)`, question: "Quelle est la valeur finale de x ?", options: ["4", "6", "10", "0"], correct: 1, points: 2, difficulty: "Difficile" },
+                { id: 59, code: `n = 15\nwhile n > 10:\n    n -= 2\nprint(n)`, question: "Quelle est la valeur finale de n ?", options: ["9", "10", "11", "8"], correct: 0, points: 1.75, difficulty: "Assez Difficile" },
+                { id: 60, code: `for i in range(3):\n    for j in range(2):\n        print("*", end="")\n    print()`, question: "Combien d'étoiles sont affichées au total ?", options: ["5", "6", "3", "2"], correct: 1, points: 2, difficulty: "Difficile" },
+                { id: 61, code: `def double(n):\n    return n * 2\nprint(double(5))`, question: "Quelle est la sortie ?", options: ["5", "10", "25", "None"], correct: 1, points: 1.5, difficulty: "Moyen" },
+                { id: 62, code: `def test(nom):\n    return "Bonjour " + nom\nprint(test("Ali"))`, question: "Quelle est la sortie ?", options: ["Bonjour", "Ali", "Bonjour Ali", "Erreur"], correct: 2, points: 1.5, difficulty: "Moyen" },
+                { id: 63, code: `def est_pair(n):\n    return n % 2 == 0\nprint(est_pair(7))`, question: "Quelle est la sortie ?", options: ["True", "False", "1", "0"], correct: 1, points: 1.75, difficulty: "Assez Difficile" },
+                { id: 64, code: `def test(a, b):\n    if a > b:\n        return a\n    return b\nprint(test(8, 5))`, question: "Quelle est la sortie ?", options: ["5", "8", "13", "None"], correct: 1, points: 1.75, difficulty: "Assez Difficile" },
+                { id: 65, code: `def calculer(x, y):\n    return x + y, x - y\na, b = calculer(10, 3)\nprint(a)`, question: "Quelle est la valeur de a ?", options: ["10", "3", "13", "7"], correct: 2, points: 2, difficulty: "Difficile" },
+                { id: 66, code: `def test(n=5):\n    return n + 1\nprint(test())`, question: "Quelle est la sortie ? (paramètre par défaut)", options: ["5", "6", "1", "None"], correct: 1, points: 1.75, difficulty: "Assez Difficile" },
+                { id: 67, code: `liste = [1, 2, 3, 4, 5]\nfor i in liste:\n    if i == 3:\n        break\n    print(i, end="")`, question: "Quelle est la sortie ?", options: ["123", "12", "12345", "345"], correct: 1, points: 1.75, difficulty: "Assez Difficile" },
+                { id: 68, code: `x = 20\nif x > 10:\n    if x > 15:\n        print("Grand")\n    else:\n        print("Moyen")\nelse:\n    print("Petit")`, question: "Quelle est la sortie ? (if imbriqués)", options: ["Grand", "Moyen", "Petit", "Erreur"], correct: 0, points: 2, difficulty: "Difficile" },
+                { id: 69, code: `def test(liste):\n    count = 0\n    for n in liste:\n        if n > 0:\n            count += 1\n    return count\nprint(test([1, -2, 3, -4, 5]))`, question: "Quelle est la sortie ?", options: ["2", "3", "5", "0"], correct: 1, points: 2, difficulty: "Difficile" },
+                { id: 70, code: `for i in range(5):\n    if i % 2 != 0:\n        continue\n    print(i, end="")`, question: "Quelle est la sortie ?", options: ["024", "135", "01234", "12345"], correct: 0, points: 1.75, difficulty: "Assez Difficile" },
+                { id: 71, code: `def test(base, exp):\n    resultat = 1\n    for i in range(exp):\n        resultat *= base\n    return resultat\nprint(test(2, 3))`, question: "Quelle est la sortie ?", options: ["6", "8", "9", "5"], correct: 1, points: 2, difficulty: "Difficile" },
+                { id: 72, code: `x = 5\nwhile x > 0:\n    if x == 2:\n        break\n    x -= 1\nprint(x)`, question: "Quelle est la valeur finale de x ?", options: ["0", "1", "2", "-1"], correct: 2, points: 2, difficulty: "Difficile" },
+                { id: 73, code: `def test(lst):\n    total = 0\n    for num in lst:\n        total += num\n    return total\nprint(test([2, 4, 6]))`, question: "Quelle est la sortie ?", options: ["6", "12", "246", "0"], correct: 1, points: 2, difficulty: "Difficile" },
+                { id: 74, code: `note = 12\nif note >= 16:\n    mention = "TB"\nelif note >= 14:\n    mention = "B"\nelif note >= 12:\n    mention = "AB"\nelse:\n    mention = "Passable"\nprint(mention)`, question: "Quelle est la sortie ?", options: ["TB", "B", "AB", "Passable"], correct: 2, points: 1.75, difficulty: "Assez Difficile" },
+                { id: 75, code: `def test(n, min_val, max_val):\n    return n >= min_val and n <= max_val\nprint(test(15, 10, 20))`, question: "Quelle est la sortie ?", options: ["True", "False", "15", "None"], correct: 0, points: 2, difficulty: "Difficile" },
+                { id: 76, code: `for i in range(3):\n    print(i)\n    if i == 1:\n        break`, question: "Combien de nombres sont affichés ?", options: ["1", "2", "3", "0"], correct: 1, points: 1.75, difficulty: "Assez Difficile" },
+                { id: 77, code: `def test(lst, facteur):\n    resultat = []\n    for val in lst:\n        resultat.append(val * facteur)\n    return resultat\nprint(test([1, 2, 3], 2))`, question: "Quelle est la sortie ?", options: ["[1, 2, 3]", "[2, 4, 6]", "[3, 6, 9]", "6"], correct: 1, points: 2.5, difficulty: "Difficile" },
+                { id: 78, code: `x = 100\nwhile x >= 90:\n    x -= 3\nprint(x)`, question: "Quelle est la valeur finale de x ?", options: ["87", "88", "89", "90"], correct: 2, points: 2, difficulty: "Difficile" },
+                { id: 79, code: `def test(texte):\n    voyelles = "aeiou"\n    count = 0\n    for char in texte.lower():\n        if char in voyelles:\n            count += 1\n    return count\nprint(test("Python"))`, question: "Quelle est la sortie ?", options: ["1", "2", "3", "0"], correct: 1, points: 2.5, difficulty: "Difficile" },
+                { id: 80, code: `def test(lst):\n    resultat = []\n    for i in range(len(lst) - 1, -1, -1):\n        resultat.append(lst[i])\n    return resultat\nprint(test([1, 2, 3, 4]))`, question: "Quelle est la sortie ? (inversion de liste)", options: ["[1, 2, 3, 4]", "[4, 3, 2, 1]", "[4, 3, 2]", "Erreur"], correct: 1, points: 2.5, difficulty: "Difficile" },
             ]
         };
 
@@ -308,7 +341,7 @@
                             <div class="bg-yellow-50 rounded-lg p-4 text-left">
                                 <p class="font-semibold text-yellow-800 mb-2">⚠️ Règles importantes :</p>
                                 <ul class="list-disc list-inside text-sm text-yellow-700 space-y-1">
-                                    <li>30 minutes - 50 questions</li>
+                                    <li>30 minutes - 80 questions</li>
                                     <li>Ne pas changer d'onglet</li>
                                     <li>-2 points par tentative</li>
                                     <li>Quiz bloqué en cas de changement</li>
@@ -401,8 +434,12 @@
                     avertissements: warnings,
                     detailsReponses: QUIZ_CONFIG.questions.map(q => ({
                         question: q.id,
+                        code: q.code,
+                        questionText: q.question,
                         reponse: answers[q.id] !== undefined ? answers[q.id] : -1,
+                        reponseText: answers[q.id] !== undefined ? q.options[answers[q.id]] : "Non répondue",
                         correct: q.correct,
+                        correctText: q.options[q.correct],
                         estCorrecte: answers[q.id] === q.correct,
                         points: answers[q.id] === q.correct ? q.points : 0,
                         difficulte: q.difficulty
@@ -430,18 +467,18 @@
                     <div className="min-h-screen flex items-center justify-center p-4">
                         <div className="slide-in glass-effect rounded-3xl shadow-2xl p-8 md:p-12 max-w-md w-full">
                             <div className="text-center mb-8">
-                                <div className="...w-32 h-32...p-2">
-                                    <img src="isi_logo.png" className="w-full h-full object-contain" />
+                                <div className="inline-flex items-center justify-center w-32 h-32 bg-white bg-opacity-20 rounded-full mb-6 float-animation overflow-hidden p-2">
+                                    <img src="isi_logo.png" alt="ISI KM Logo" className="w-full h-full object-contain" />
                                 </div>
                                 <h1 className="text-4xl font-bold text-white mb-3">Quiz Python</h1>
-                                <p className="text-white text-opacity-90 text-lg mb-2">ISI Keur Massar - Licence 2</p>
+                                <p className="text-white text-opacity-90 text-lg mb-2">ISI Keur  - Licence 2</p>
                                 <p className="text-white text-opacity-70">Code d'accès requis</p>
                             </div>
 
                             <div className="space-y-6">
                                 <div className="relative">
                                     <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                                        <i className="fas fa-block text-white text-opacity-50"></i>
+                                        <i className="fas fa-key text-white text-opacity-50"></i>
                                     </div>
                                     <input
                                         type="password"
@@ -476,7 +513,7 @@
                                     <div className="w-1 h-1 bg-white bg-opacity-50 rounded-full"></div>
                                     <div className="flex items-center">
                                         <i className="fas fa-question-circle mr-2"></i>
-                                        <span>50 questions</span>
+                                        <span>80 questions</span>
                                     </div>
                                 </div>
                             </div>
@@ -499,8 +536,7 @@
                                 </h1>
                                 <p className="text-gray-600 flex items-center justify-center gap-4">
                                     <span><i className="far fa-clock mr-1"></i> 30 minutes</span>
-                                    <span><i className="fas fa-star mr-1"></i> 75 points</span>
-                                    <span><i className="fas fa-question-circle mr-1"></i> 50 questions</span>
+                                    <span><i className="fas fa-question-circle mr-1"></i> 80 questions</span>
                                 </p>
                             </div>
 
@@ -634,11 +670,12 @@
                                     </div>
                                 </div>
 
+                                {/* Barre de progression */}
                                 <div className="mt-4">
                                     <div className="flex justify-between items-center mb-2">
                                         <span className="text-sm font-semibold text-gray-700">
                                             <i className="fas fa-list mr-1"></i>
-                                            Question {currentQuestion + 1} / {QUIZ_CONFIG.questions.length}
+                                            Question {currentQuestion + 1} sur {QUIZ_CONFIG.questions.length}
                                         </span>
                                         <div className="flex items-center gap-2">
                                             <span className={`px-3 py-1 rounded-full text-xs font-semibold border-2 ${difficultyColors[question.difficulty]}`}>
@@ -861,7 +898,14 @@
                                                                         +{q.points} pts
                                                                     </span>
                                                                 </div>
-                                                                <p className="text-sm text-gray-600">{q.question}</p>
+                                                                <p className="text-sm text-gray-700 mb-2">{q.question}</p>
+                                                                <div className="bg-gray-900 rounded-lg p-3 mb-2">
+                                                                    <pre className="text-green-400 text-xs overflow-x-auto">{q.code}</pre>
+                                                                </div>
+                                                                <div className="text-sm text-green-600 flex items-center">
+                                                                    <i className="fas fa-check mr-2"></i>
+                                                                    <span><strong>Votre réponse :</strong> {q.options[answers[q.id]]}</span>
+                                                                </div>
                                                             </div>
                                                         ))}
                                                     </div>
@@ -884,6 +928,9 @@
                                                                     </span>
                                                                 </div>
                                                                 <p className="text-sm text-gray-700 mb-3">{q.question}</p>
+                                                                <div className="bg-gray-900 rounded-lg p-3 mb-3">
+                                                                    <pre className="text-green-400 text-xs overflow-x-auto">{q.code}</pre>
+                                                                </div>
                                                                 <div className="space-y-2 text-sm">
                                                                     <div className="flex items-center text-red-600">
                                                                         <i className="fas fa-times mr-2"></i>
@@ -915,10 +962,13 @@
                                                                         0 pts
                                                                     </span>
                                                                 </div>
-                                                                <p className="text-sm text-gray-600 mb-2">{q.question}</p>
-                                                                <div className="text-sm text-green-600">
+                                                                <p className="text-sm text-gray-700 mb-2">{q.question}</p>
+                                                                <div className="bg-gray-900 rounded-lg p-3 mb-2">
+                                                                    <pre className="text-green-400 text-xs overflow-x-auto">{q.code}</pre>
+                                                                </div>
+                                                                <div className="text-sm text-green-600 flex items-center">
                                                                     <i className="fas fa-check mr-2"></i>
-                                                                    <strong>Bonne réponse :</strong> {q.options[q.correct]}
+                                                                    <span><strong>Bonne réponse :</strong> {q.options[q.correct]}</span>
                                                                 </div>
                                                             </div>
                                                         ))}
@@ -942,7 +992,3 @@
     </script>
 </body>
 </html>
-
-
-
-
