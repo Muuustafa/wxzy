@@ -938,32 +938,39 @@
                     {/* MODAL DÉTAILS ÉTUDIANT */}
                     {selectedStudent && (
                         <div className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center p-4 z-50 animate-fadeIn">
-                            <div className="bg-white rounded-3xl shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-hidden">
-                                <div className="bg-gradient-to-r from-indigo-600 to-purple-600 text-white p-8">
+                            <div className="bg-white rounded-3xl shadow-2xl max-w-5xl w-full max-h-[90vh] overflow-hidden">
+                                {/* HEADER */}
+                                <div className="bg-gradient-to-r from-indigo-600 to-purple-600 text-white p-6">
                                     <div className="flex justify-between items-start">
                                         <div>
                                             <h2 className="text-3xl font-bold mb-2">{selectedStudent.etudiant}</h2>
                                             <p className="text-white text-opacity-90 text-lg">{selectedStudent.classe}</p>
                                         </div>
-                                        <button onClick={() => setSelectedStudent(null)} 
+                                        <button onClick={() => {
+                                            setSelectedStudent(null);
+                                            setShowDetailedAnswers(false);
+                                        }} 
                                                 className="text-white hover:bg-white hover:bg-opacity-20 rounded-full p-2 transition">
                                             <i className="fas fa-times text-2xl"></i>
                                         </button>
                                     </div>
                                 </div>
 
-                                <div className="p-8 overflow-y-auto" style={{ maxHeight: 'calc(90vh - 180px)' }}>
+                                {/* CONTENU */}
+                                <div className="p-8 overflow-y-auto" style={{ maxHeight: 'calc(90vh - 160px)' }}>
+                                    {/* NOTE RECTANGULAIRE */}
                                     <div className="text-center mb-8">
-                                        <div className={`inline-flex items-center justify-center w-28 h-28 ${parseFloat(selectedStudent.note) >= 10 ? 'bg-gradient-to-br from-green-400 to-emerald-500' : 'bg-gradient-to-br from-red-400 to-orange-500'} rounded-full mb-4 shadow-xl`}>
-                                            <div className="text-center">
-                                                <div className="text-5xl font-bold text-white">{selectedStudent.note}</div>
-                                                <div className="text-xl text-white opacity-90">/20</div>
+                                        <div className={`inline-block ${parseFloat(selectedStudent.note) >= 10 ? 'bg-gradient-to-br from-green-500 to-emerald-600' : 'bg-gradient-to-br from-red-500 to-orange-600'} rounded-2xl p-6 shadow-2xl mb-4`}>
+                                            <div className="flex items-baseline justify-center gap-2">
+                                                <span className="text-7xl font-bold text-white">{selectedStudent.note}</span>
+                                                <span className="text-4xl text-white opacity-90">/20</span>
                                             </div>
                                         </div>
                                         <h3 className="text-3xl font-bold text-gray-800 mb-2">Résultat Final</h3>
                                         <p className="text-gray-600 text-lg">{selectedStudent.correct} / {selectedStudent.total} réponses correctes</p>
                                     </div>
 
+                                    {/* STATISTIQUES */}
                                     <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
                                         <div className="bg-gradient-to-br from-blue-50 to-blue-100 p-5 rounded-2xl text-center border-2 border-blue-200">
                                             <div className="text-3xl font-bold text-blue-600 mb-1">{selectedStudent.pourcentage}%</div>
@@ -974,7 +981,7 @@
                                             <div className="text-sm text-gray-700 font-semibold">Correctes</div>
                                         </div>
                                         <div className="bg-gradient-to-br from-purple-50 to-purple-100 p-5 rounded-2xl text-center border-2 border-purple-200">
-                                            <div className="text-3xl font-bold text-purple-600 mb-1">{selectedStudent.duree}</div>
+                                            <div className="text-3xl font-bold text-purple-600 mb-1">{selectedStudent.duree || 'N/A'}</div>
                                             <div className="text-sm text-gray-700 font-semibold">Durée</div>
                                         </div>
                                         <div className="bg-gradient-to-br from-red-50 to-red-100 p-5 rounded-2xl text-center border-2 border-red-200">
@@ -983,16 +990,135 @@
                                         </div>
                                     </div>
 
+                                    {/* DÉTAILS DES RÉPONSES */}
                                     {showDetailedAnswers && selectedStudent.detailsReponses && (
                                         <div className="space-y-6 mb-8">
-                                            <h4 className="text-2xl font-bold text-gray-800 mb-4 flex items-center">
+                                            <h4 className="text-2xl font-bold text-gray-800 mb-6 flex items-center">
                                                 <i className="fas fa-list-ul mr-3 text-indigo-500"></i>
-                                                Analyse Détaillée
+                                                Analyse Détaillée des Réponses
                                             </h4>
-                                            {/* Section détails des réponses ici si nécessaire */}
+                                            
+                                            {(() => {
+                                                const correctAnswers = selectedStudent.detailsReponses.filter(r => r.estCorrecte);
+                                                const incorrectAnswers = selectedStudent.detailsReponses.filter(r => !r.estCorrecte && r.reponse !== -1);
+                                                const unanswered = selectedStudent.detailsReponses.filter(r => r.reponse === -1);
+                                                
+                                                return (
+                                                    <>
+                                                        {/* RÉPONSES CORRECTES */}
+                                                        {correctAnswers.length > 0 && (
+                                                            <div className="bg-green-50 rounded-2xl p-6 border-2 border-green-200">
+                                                                <h5 className="text-xl font-bold text-green-700 mb-4 flex items-center">
+                                                                    <i className="fas fa-check-circle mr-2"></i>
+                                                                    Réponses Correctes ({correctAnswers.length})
+                                                                </h5>
+                                                                <div className="space-y-3">
+                                                                    {correctAnswers.map((detail) => {
+                                                                        const q = QUIZ_CONFIG.questions.find(quest => quest.id === detail.question);
+                                                                        return (
+                                                                            <div key={detail.question} className="bg-white rounded-xl p-4 border-l-4 border-green-500">
+                                                                                <div className="flex justify-between items-start mb-2">
+                                                                                    <span className="font-semibold text-gray-800">Question {detail.question}</span>
+                                                                                    <span className="bg-green-500 text-white px-3 py-1 rounded-full text-sm font-bold">
+                                                                                        +{detail.points} pts
+                                                                                    </span>
+                                                                                </div>
+                                                                                {q && (
+                                                                                    <>
+                                                                                        <p className="text-sm text-gray-700 mb-2">{q.question}</p>
+                                                                                        <div className="text-sm text-green-600 flex items-center">
+                                                                                            <i className="fas fa-check mr-2"></i>
+                                                                                            <span><strong>Réponse :</strong> {q.options[detail.reponse]}</span>
+                                                                                        </div>
+                                                                                    </>
+                                                                                )}
+                                                                            </div>
+                                                                        );
+                                                                    })}
+                                                                </div>
+                                                            </div>
+                                                        )}
+
+                                                        {/* RÉPONSES INCORRECTES */}
+                                                        {incorrectAnswers.length > 0 && (
+                                                            <div className="bg-red-50 rounded-2xl p-6 border-2 border-red-200">
+                                                                <h5 className="text-xl font-bold text-red-700 mb-4 flex items-center">
+                                                                    <i className="fas fa-times-circle mr-2"></i>
+                                                                    Réponses Incorrectes ({incorrectAnswers.length})
+                                                                </h5>
+                                                                <div className="space-y-3">
+                                                                    {incorrectAnswers.map((detail) => {
+                                                                        const q = QUIZ_CONFIG.questions.find(quest => quest.id === detail.question);
+                                                                        return (
+                                                                            <div key={detail.question} className="bg-white rounded-xl p-4 border-l-4 border-red-500">
+                                                                                <div className="flex justify-between items-start mb-3">
+                                                                                    <span className="font-semibold text-gray-800">Question {detail.question}</span>
+                                                                                    <span className="bg-red-500 text-white px-3 py-1 rounded-full text-sm font-bold">
+                                                                                        0 pts
+                                                                                    </span>
+                                                                                </div>
+                                                                                {q && (
+                                                                                    <>
+                                                                                        <p className="text-sm text-gray-700 mb-3">{q.question}</p>
+                                                                                        <div className="space-y-2 text-sm">
+                                                                                            <div className="flex items-center text-red-600">
+                                                                                                <i className="fas fa-times mr-2"></i>
+                                                                                                <span><strong>Votre réponse :</strong> {q.options[detail.reponse]}</span>
+                                                                                            </div>
+                                                                                            <div className="flex items-center text-green-600">
+                                                                                                <i className="fas fa-check mr-2"></i>
+                                                                                                <span><strong>Bonne réponse :</strong> {q.options[detail.correct]}</span>
+                                                                                            </div>
+                                                                                        </div>
+                                                                                    </>
+                                                                                )}
+                                                                            </div>
+                                                                        );
+                                                                    })}
+                                                                </div>
+                                                            </div>
+                                                        )}
+
+                                                        {/* QUESTIONS NON RÉPONDUES */}
+                                                        {unanswered.length > 0 && (
+                                                            <div className="bg-gray-50 rounded-2xl p-6 border-2 border-gray-200">
+                                                                <h5 className="text-xl font-bold text-gray-700 mb-4 flex items-center">
+                                                                    <i className="fas fa-question-circle mr-2"></i>
+                                                                    Questions Non Répondues ({unanswered.length})
+                                                                </h5>
+                                                                <div className="space-y-3">
+                                                                    {unanswered.map((detail) => {
+                                                                        const q = QUIZ_CONFIG.questions.find(quest => quest.id === detail.question);
+                                                                        return (
+                                                                            <div key={detail.question} className="bg-white rounded-xl p-4 border-l-4 border-gray-400">
+                                                                                <div className="flex justify-between items-start mb-2">
+                                                                                    <span className="font-semibold text-gray-800">Question {detail.question}</span>
+                                                                                    <span className="bg-gray-400 text-white px-3 py-1 rounded-full text-sm font-bold">
+                                                                                        0 pts
+                                                                                    </span>
+                                                                                </div>
+                                                                                {q && (
+                                                                                    <>
+                                                                                        <p className="text-sm text-gray-700 mb-2">{q.question}</p>
+                                                                                        <div className="text-sm text-green-600 flex items-center">
+                                                                                            <i className="fas fa-check mr-2"></i>
+                                                                                            <span><strong>Bonne réponse :</strong> {q.options[detail.correct]}</span>
+                                                                                        </div>
+                                                                                    </>
+                                                                                )}
+                                                                            </div>
+                                                                        );
+                                                                    })}
+                                                                </div>
+                                                            </div>
+                                                        )}
+                                                    </>
+                                                );
+                                            })()}
                                         </div>
                                     )}
 
+                                    {/* BOUTONS D'ACTION */}
                                     <div className="flex flex-col sm:flex-row gap-3 mt-6">
                                         <button onClick={() => setShowDetailedAnswers(!showDetailedAnswers)} 
                                                 className="flex-1 bg-gradient-to-r from-indigo-500 to-purple-600 text-white py-4 rounded-xl font-bold text-lg hover:from-indigo-600 hover:to-purple-700 transition-all shadow-lg flex items-center justify-center">
@@ -1012,7 +1138,10 @@
                                             <i className="fas fa-file-export mr-2"></i>
                                             Exporter
                                         </button>
-                                        <button onClick={() => setSelectedStudent(null)} 
+                                        <button onClick={() => {
+                                            setSelectedStudent(null);
+                                            setShowDetailedAnswers(false);
+                                        }} 
                                                 className="px-8 bg-gray-200 text-gray-700 py-4 rounded-xl font-bold text-lg hover:bg-gray-300 transition-all">
                                             Fermer
                                         </button>
