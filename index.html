@@ -118,10 +118,102 @@
         };
 
         // Hash des codes (précalculés pour éviter le reverse engineering)
-        // Code d'accès
+        // Code d'accès: QZ2025PYTH
         const ACCESS_CODE_HASH = "fa05680ca63c467b04be161670e1952a8967a4e879c77d9273d3e72a490569d5";
-        // Code de récupération
+        // Code de récupération: QZ2025PYTH  
         const RECOVERY_CODE_HASH = "fa05680ca63c467b04be161670e1952a8967a4e879c77d9273d3e72a490569d5";
+        // Code de sortie: QZOUTPYTH2026
+        const EXIT_CODE_HASH = "aa89beeaf1c06a934c739d4b996be3381b7aa94247fe0e0e6ed1860ab6314b90";
+
+        // Gestion du mode plein écran
+        const enterFullscreen = () => {
+            const element = document.documentElement;
+            if (element.requestFullscreen) {
+                element.requestFullscreen();
+            } else if (element.webkitRequestFullscreen) {
+                element.webkitRequestFullscreen();
+            } else if (element.mozRequestFullScreen) {
+                element.mozRequestFullScreen();
+            } else if (element.msRequestFullscreen) {
+                element.msRequestFullscreen();
+            }
+        };
+
+        const exitFullscreen = () => {
+            if (document.exitFullscreen) {
+                document.exitFullscreen();
+            } else if (document.webkitExitFullscreen) {
+                document.webkitExitFullscreen();
+            } else if (document.mozCancelFullScreen) {
+                document.mozCancelFullScreen();
+            } else if (document.msExitFullscreen) {
+                document.msExitFullscreen();
+            }
+        };
+
+        const isFullscreen = () => {
+            return !!(document.fullscreenElement || 
+                     document.webkitFullscreenElement || 
+                     document.mozFullScreenElement || 
+                     document.msFullscreenElement);
+        };
+
+        // Gérer la tentative de sortie du plein écran
+        const handleFullscreenExit = async () => {
+            const { value: code } = await Swal.fire({
+                icon: 'warning',
+                title: '🔒 CODE DE SORTIE REQUIS',
+                html: `
+                    <div class="text-center">
+                        <i class="fas fa-lock text-6xl text-orange-500 mb-4"></i>
+                        <p class="text-xl font-bold text-gray-800 mb-2">Vous tentez de quitter le mode plein écran</p>
+                        <p class="text-gray-600 mb-4">Cette action nécessite un code de sortie</p>
+                        <p class="text-sm text-red-600">⚠️ Toute tentative de sortie sera enregistrée</p>
+                    </div>
+                `,
+                input: 'password',
+                inputLabel: 'Code de sortie',
+                inputPlaceholder: 'Entrez le code fourni par l\'enseignant',
+                showCancelButton: true,
+                confirmButtonText: 'Valider',
+                cancelButtonText: 'Retour au quiz',
+                allowOutsideClick: false,
+                allowEscapeKey: false,
+                inputValidator: (value) => {
+                    if (!value) return 'Le code est requis';
+                }
+            });
+
+            if (code) {
+                const codeHash = await hashCode(code);
+                if (codeHash === EXIT_CODE_HASH) {
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Code correct',
+                        text: 'Vous pouvez maintenant quitter',
+                        timer: 2000,
+                        showConfirmButton: false
+                    });
+                    exitFullscreen();
+                    return true;
+                } else {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Code incorrect',
+                        text: 'Retour au quiz en mode plein écran',
+                        timer: 2000,
+                        showConfirmButton: false
+                    }).then(() => {
+                        enterFullscreen();
+                    });
+                    return false;
+                }
+            } else {
+                // L'étudiant a annulé, on remet en plein écran
+                enterFullscreen();
+                return false;
+            }
+        };
 
         // Protection contre l'ouverture de la console pendant le quiz
         let consoleCheckInterval = null;
@@ -340,6 +432,55 @@
                     startConsoleProtection();
                 } else {
                     stopConsoleProtection();
+                }
+            }, [screen]);
+
+            // Gestion du plein écran pendant le quiz
+            useEffect(() => {
+                if (screen === 'quiz') {
+                    // Passer en plein écran au démarrage du quiz
+                    enterFullscreen();
+
+                    // Écouter la touche ESC
+                    const handleEscKey = async (e) => {
+                        if (e.key === 'Escape') {
+                            e.preventDefault();
+                            await handleFullscreenExit();
+                        }
+                    };
+
+                    // Écouter les tentatives de sortie du plein écran
+                    const handleFullscreenChange = async () => {
+                        if (!isFullscreen() && screen === 'quiz') {
+                            // L'étudiant a quitté le plein écran (F11, ESC, etc.)
+                            const allowed = await handleFullscreenExit();
+                            if (!allowed) {
+                                // Remettre en plein écran si le code est refusé
+                                setTimeout(() => {
+                                    if (screen === 'quiz' && !isFullscreen()) {
+                                        enterFullscreen();
+                                    }
+                                }, 100);
+                            }
+                        }
+                    };
+
+                    document.addEventListener('keydown', handleEscKey);
+                    document.addEventListener('fullscreenchange', handleFullscreenChange);
+                    document.addEventListener('webkitfullscreenchange', handleFullscreenChange);
+                    document.addEventListener('mozfullscreenchange', handleFullscreenChange);
+                    document.addEventListener('MSFullscreenChange', handleFullscreenChange);
+
+                    return () => {
+                        document.removeEventListener('keydown', handleEscKey);
+                        document.removeEventListener('fullscreenchange', handleFullscreenChange);
+                        document.removeEventListener('webkitfullscreenchange', handleFullscreenChange);
+                        document.removeEventListener('mozfullscreenchange', handleFullscreenChange);
+                        document.removeEventListener('MSFullscreenChange', handleFullscreenChange);
+                    };
+                } else if (screen === 'results') {
+                    // Sortir du plein écran à la fin du quiz
+                    exitFullscreen();
                 }
             }, [screen]);
 
@@ -773,8 +914,19 @@
 
                 return (
                     <div className="min-h-screen">
+                        {/* BANNIÈRE MODE PLEIN ÉCRAN */}
+                        <div className="fixed top-0 left-0 right-0 bg-gradient-to-r from-red-600 to-orange-600 text-white py-2 px-4 z-50 shadow-lg">
+                            <div className="flex items-center justify-center gap-3 text-sm font-semibold">
+                                <i className="fas fa-expand text-lg"></i>
+                                <span>MODE PLEIN ÉCRAN ACTIF</span>
+                                <span className="text-xs bg-white bg-opacity-20 px-3 py-1 rounded-full">
+                                    Appuyez sur ESC pour quitter (code requis)
+                                </span>
+                            </div>
+                        </div>
+
                         {/* HEADER */}
-                        <div className="bg-white bg-opacity-95 backdrop-blur-xl shadow-lg sticky top-0 z-50">
+                        <div className="bg-white bg-opacity-95 backdrop-blur-xl shadow-lg sticky top-10 z-40" style={{ marginTop: '40px' }}>
                             <div className="max-w-7xl mx-auto px-4 py-4">
                                 <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                                     <div className="flex items-center space-x-4">
@@ -1133,4 +1285,3 @@
     </script>
 </body>
 </html>
-
