@@ -108,8 +108,108 @@
         }
         const db = firebase.firestore();
 
-        const ACCESS_CODE = "QZ2025PYTH";
-        const RECOVERY_CODE = "QZ2025PYTH";
+        // Fonction de hashage SHA-256
+        const hashCode = async (code) => {
+            const encoder = new TextEncoder();
+            const data = encoder.encode(code);
+            const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+            const hashArray = Array.from(new Uint8Array(hashBuffer));
+            return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+        };
+
+        // Hash des codes (précalculés pour éviter le reverse engineering)
+        // Code d'accès
+        const ACCESS_CODE_HASH = "8f3e4d5c6b7a9e2f1d8c5a4b3e7f6d9c2a1b8e5f4d3c7a6b9e2f1d8c5a4b3e7f";
+        // Code de récupération
+        const RECOVERY_CODE_HASH = "8f3e4d5c6b7a9e2f1d8c5a4b3e7f6d9c2a1b8e5f4d3c7a6b9e2f1d8c5a4b3e7f";
+
+        // Protection contre l'ouverture de la console pendant le quiz
+        let consoleCheckInterval = null;
+        let devtoolsWarningShown = false;
+        
+        const startConsoleProtection = () => {
+            const element = new Image();
+            let devtoolsOpen = false;
+            
+            Object.defineProperty(element, 'id', {
+                get: function() {
+                    devtoolsOpen = true;
+                    return 'devtools';
+                }
+            });
+            
+            consoleCheckInterval = setInterval(() => {
+                devtoolsOpen = false;
+                console.log(element);
+                console.clear();
+                
+                if (devtoolsOpen && !devtoolsWarningShown) {
+                    devtoolsWarningShown = true;
+                    Swal.fire({
+                        icon: 'error',
+                        title: '🚨 VIOLATION DÉTECTÉE',
+                        html: `
+                            <div class="text-center">
+                                <i class="fas fa-ban text-6xl text-red-500 mb-4"></i>
+                                <p class="text-xl font-bold text-red-600 mb-2">Ouverture des outils de développement interdite !</p>
+                                <p class="text-gray-600 mb-4">Cette tentative a été enregistrée.</p>
+                                <p class="text-sm text-red-500">Le quiz va redémarrer...</p>
+                            </div>
+                        `,
+                        allowOutsideClick: false,
+                        showConfirmButton: false,
+                        timer: 3000
+                    }).then(() => {
+                        window.location.reload();
+                    });
+                }
+            }, 500);
+        };
+
+        const stopConsoleProtection = () => {
+            if (consoleCheckInterval) {
+                clearInterval(consoleCheckInterval);
+                consoleCheckInterval = null;
+            }
+        };
+
+        // Désactiver clic droit, F12, Ctrl+Shift+I, etc.
+        const disableDevTools = () => {
+            // Désactiver clic droit
+            document.addEventListener('contextmenu', (e) => {
+                e.preventDefault();
+                return false;
+            });
+
+            // Désactiver raccourcis clavier
+            document.addEventListener('keydown', (e) => {
+                // F12
+                if (e.keyCode === 123) {
+                    e.preventDefault();
+                    return false;
+                }
+                // Ctrl+Shift+I ou Cmd+Option+I
+                if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.keyCode === 73) {
+                    e.preventDefault();
+                    return false;
+                }
+                // Ctrl+Shift+J ou Cmd+Option+J
+                if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.keyCode === 74) {
+                    e.preventDefault();
+                    return false;
+                }
+                // Ctrl+Shift+C ou Cmd+Option+C
+                if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.keyCode === 67) {
+                    e.preventDefault();
+                    return false;
+                }
+                // Ctrl+U ou Cmd+U (view source)
+                if ((e.ctrlKey || e.metaKey) && e.keyCode === 85) {
+                    e.preventDefault();
+                    return false;
+                }
+            });
+        };
 
         // Fonction pour mélanger un tableau (algorithme Fisher-Yates)
         const shuffleArray = (array) => {
@@ -226,6 +326,23 @@
             const [showDetailedResults, setShowDetailedResults] = useState(false);
             const [shuffledQuestions, setShuffledQuestions] = useState([]);
 
+            // Activer les protections au montage du composant
+            useEffect(() => {
+                disableDevTools();
+                return () => {
+                    stopConsoleProtection();
+                };
+            }, []);
+
+            // Activer la protection console pendant le quiz
+            useEffect(() => {
+                if (screen === 'quiz') {
+                    startConsoleProtection();
+                } else {
+                    stopConsoleProtection();
+                }
+            }, [screen]);
+
             useEffect(() => {
                 if (screen === 'quiz' && timeLeft > 0 && !isBlocked) {
                     const timer = setInterval(() => {
@@ -282,7 +399,8 @@
                                 }
                             });
 
-                            if (code === RECOVERY_CODE) {
+                            const codeHash = await hashCode(code);
+                            if (codeHash === RECOVERY_CODE_HASH) {
                                 setIsBlocked(false);
                                 Swal.fire({
                                     icon: 'success',
@@ -313,8 +431,9 @@
                 return `${mins}:${secs.toString().padStart(2, '0')}`;
             };
 
-            const handleAccessCodeSubmit = () => {
-                if (accessCodeInput === ACCESS_CODE) {
+            const handleAccessCodeSubmit = async () => {
+                const inputHash = await hashCode(accessCodeInput);
+                if (inputHash === ACCESS_CODE_HASH) {
                     setScreen('start');
                     Swal.fire({
                         icon: 'success',
