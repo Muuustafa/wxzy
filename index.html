@@ -117,12 +117,8 @@
             return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
         };
 
-        // Hash des codes (précalculés pour éviter le reverse engineering)
-        // Code d'accès: QZ2025PYTH
         const ACCESS_CODE_HASH = "fa05680ca63c467b04be161670e1952a8967a4e879c77d9273d3e72a490569d5";
-        // Code de récupération: QZ2025PYTH  
         const RECOVERY_CODE_HASH = "fa05680ca63c467b04be161670e1952a8967a4e879c77d9273d3e72a490569d5";
-        // Code de sortie: QZOUTPYTH2026
         const EXIT_CODE_HASH = "aa89beeaf1c06a934c739d4b996be3381b7aa94247fe0e0e6ed1860ab6314b90";
 
         // Gestion du mode plein écran
@@ -315,7 +311,7 @@
 
         const QUIZ_CONFIG = {
             title: "Quiz Python - Licence 2 ISI Keur Massar",
-            duration: 1800, // 30 minutes pour 80 questions
+            duration: 2100,
             penaltyPerWarning: 2,
             questions: [
                 // QUESTIONS 1-50 (ORIGINALES)
@@ -1285,3 +1281,4 @@
     </script>
 </body>
 </html>
+
