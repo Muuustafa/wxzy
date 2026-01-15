@@ -395,7 +395,7 @@
                 { id: 76, code: `for i in range(3):\n    print(i)\n    if i == 1:\n        break`, question: "Combien de nombres sont affichés ?", options: ["1", "2", "3", "0"], correct: 1, points: 1.75, difficulty: "Assez Difficile" },
                 { id: 77, code: `def test11(lst, facteur):\n    resultat = []\n    for val in lst:\n        resultat.append(val * facteur)\n    return resultat\nprint(test11([1, 2, 3], 2))`, question: "Quelle est la sortie ?", options: ["[1, 2, 3]", "[2, 4, 6]", "[3, 6, 9]", "6"], correct: 1, points: 2.5, difficulty: "Difficile" },
                 { id: 78, code: `x = 100\nwhile x >= 90:\n    x -= 3\nprint(x)`, question: "Quelle est la valeur finale de x ?", options: ["87", "88", "89", "90"], correct: 2, points: 2, difficulty: "Difficile" },
-                { id: 79, code: `def test12(texte):\n    voyelles = "aeiou"\n    count = 0\n    for char in texte.lower():\n        if char in voyelles:\n            count += 1\n    return count\nprint(test12("Python"))`, question: "Quelle est la sortie ?", options: ["1", "2", "3", "0"], correct: 1, points: 2.5, difficulty: "Difficile" },
+                { id: 79, code: `def test12(texte):\n    voyelles = "aeiou"\n    count = 0\n    for char in texte.lower():\n        if char in voyelles:\n            count += 1\n    return count\nprint(test12("Antony"))`, question: "Quelle est la sortie ?", options: ["1", "2", "3", "0"], correct: 1, points: 2.5, difficulty: "Difficile" },
                 { id: 80, code: `def test13(lst):\n    resultat = []\n    for i in range(len(lst) - 1, -1, -1):\n        resultat.append(lst[i])\n    return resultat\nprint(test13([1, 2, 3, 4]))`, question: "Quelle est la sortie ? (inversion de liste)", options: ["[1, 2, 3, 4]", "[4, 3, 2, 1]", "[4, 3, 2]", "Erreur"], correct: 1, points: 2.5, difficulty: "Difficile" },
             ]
         };
@@ -1281,6 +1281,7 @@
     </script>
 </body>
 </html>
+
 
 
 
