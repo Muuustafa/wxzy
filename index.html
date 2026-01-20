@@ -348,8 +348,8 @@
             penaltyPerWarning: 2,
             questions: [
                 // NOUVELLES QUESTIONS 1-80 (DEUXIÈME DEVOIR)
-                { id: 1, code: `x = float(5)\nprint(x)`, question: "Quelle est la sortie ? (conversion int vers float)", options: ["5", "5.0", "5.00", "Erreur"], correct: 1, points: 1, difficulty: "Facile" },
-                { id: 2, code: `texte = "Algorithmique"\nprint(len(texte))`, question: "Quelle est la longueur de la chaîne ?", options: ["10", "11", "12", "13"], correct: 2, points: 1, difficulty: "Facile" },
+                { id: 1, code: `x = float(5)\nprint(x)`, question: "Quelle est la sortie ?", options: ["5", "5.0", "5.00", "Erreur"], correct: 1, points: 1, difficulty: "Facile" },
+                { id: 2, code: `texte = "Algorithmique"\nprint(len(texte))`, question: "Quelle est la sortie ?", options: ["10", "11", "12", "13"], correct: 2, points: 1, difficulty: "Facile" },
                 { id: 3, code: `x = False\nprint(int(x))`, question: "Quelle est la sortie ?", options: ["False", "1", "0", "Erreur"], correct: 2, points: 1, difficulty: "Facile" },
                 { id: 4, code: `liste = [15, 25, 35]\nprint(liste[-2])`, question: "Quelle est la sortie ?", options: ["15", "25", "35", "Erreur"], correct: 1, points: 1, difficulty: "Facile" },
                 { id: 5, code: `print(type(42))`, question: "Quelle est la sortie ?", options: ["<class 'int'>", "<class 'float'>", "<class 'str'>", "<class 'number'>"], correct: 0, points: 1, difficulty: "Facile" },
@@ -372,8 +372,8 @@
                 { id: 22, code: `x = 3\ny = 4\nprint(x ** y)`, question: "Quelle est la sortie ?", options: ["7", "12", "81", "64"], correct: 2, points: 1.5, difficulty: "Moyen" },
                 { id: 23, code: `def test1(a, b):\n    return a * b\nprint(test1(6, 7))`, question: "Quelle est la sortie ?", options: ["67", "13", "42", "None"], correct: 2, points: 1.5, difficulty: "Moyen" },
                 { id: 24, code: `texte = "a;b;c;d"\nelements = texte.split(';')\nprint(elements[2])`, question: "Quelle est la sortie ?", options: ["a", "b", "c", "d"], correct: 2, points: 1.5, difficulty: "Moyen" },
-                { id: 25, code: `x = ['a', 'b', 'c']\nx[0] = 'z'\nprint(x)`, question: "Quelle est la sortie ?", options: "['z', 'b', 'c']", "['a', 'z', 'c']", "['a', 'b', 'z']", "Erreur"], correct: 0, points: 1.5, difficulty: "Moyen" },
-                { id: 26, code: `liste = [10, 20]\ny = [30, 40, 50]\nz = liste + y\nprint(z[3])`, question: "Quel est le quatrième élément de z ?", options: ["10", "20", "40", "50"], correct: 2, points: 1.5, difficulty: "Moyen" },
+                { id: 25, code: `x = ['a', 'b', 'c']\nx[0] = 'z'\nprint(x)`, question: "Quelle est la sortie ?", options: ["['z', 'b', 'c']", "['a', 'z', 'c']", "['a', 'b', 'z']", "Erreur"], correct: 0, points: 1.5, difficulty: "Moyen" },
+                { id: 26, code: `liste = [10, 20]\ny = [30, 40, 50]\nz = liste + y\nprint(z[3])`, question: "Quelle est la sortie ?", options: ["10", "20", "40", "50"], correct: 2, points: 1.5, difficulty: "Moyen" },
                 { id: 27, code: `mots = ["x", "y", "z"]\nresultat = ".".join(mots)\nprint(resultat)`, question: "Quelle est la sortie ?", options: ["xyz", "x.y.z", "x y z", "Erreur"], correct: 1, points: 1.5, difficulty: "Moyen" },
                 { id: 28, code: `for i in range(4):\n    if i == 1:\n        continue\n    print(i, end=" ")`, question: "Quelle est la sortie ?", options: ["0 1 2 3", "0 2 3", "1 2 3", "2 3"], correct: 1, points: 1.5, difficulty: "Moyen" },
                 { id: 29, code: `x = "programmation"\ny = x.replace("m", "M")\nprint(y)`, question: "Quelle est la sortie ?", options: ["programmation", "prograMmation", "programMation", "progRAMmation"], correct: 1, points: 1.5, difficulty: "Moyen" },
@@ -1388,3 +1388,4 @@
     </script>
 </body>
 </html>
+
