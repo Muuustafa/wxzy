@@ -362,7 +362,7 @@
                 { id: 11, code: `mots = "ISI Keur Massar".split()\nprint(mots[1])`, question: "Quelle est la sortie ?", options: ["ISI", "Keur", "Massar", "Erreur"], correct: 1, points: 1.25, difficulty: "Assez Facile" },
                 { id: 12, code: `x = "45.5"\ny = float(x)\nprint(y + 0.5)`, question: "Quelle est la sortie ?", options: ["45.5", "46.0", "46", "Erreur"], correct: 1, points: 1.25, difficulty: "Assez Facile" },
                 { id: 13, code: `liste = [10, 20, 30, 40, 50]\nprint(liste[2:])`, question: "Quelle est la sortie ?", options: ["[10, 20]", "[20, 30]", "[30, 40, 50]", "[40, 50]"], correct: 2, points: 1.25, difficulty: "Assez Facile" },
-                { id: 14, code: `x = "ordinateur"\nprint(x[2] + x[5])`, question: "Quelle est la sortie ?", options: ["or", "di", "dn", "te"], correct: 2, points: 1.25, difficulty: "Assez Facile" },
+                { id: 14, code: `x = "ordinateur"\nprint(x[2] + x[5])`, question: "Quelle est la sortie ?", options: ["or", "di", "da", "te"], correct: 2, points: 1.25, difficulty: "Assez Facile" },
                 { id: 15, code: `for i in range(1, 4):\n    print(i, end=" ")`, question: "Quelle est la sortie complète ?", options: ["123", "1 2 3", "0 1 2 3", "3 2 1"], correct: 1, points: 1.25, difficulty: "Assez Facile" },
                 { id: 16, code: `x = 24\nresultat = "Pair" if x % 2 == 0 else "Impair"\nprint(resultat)`, question: "Quelle est la sortie ?", options: ["Pair", "Impair", "True", "False"], correct: 0, points: 1.25, difficulty: "Assez Facile" },
                 { id: 17, code: `x = [5, 10, 15]\ny = [20, 25]\nx += y\nprint(len(x))`, question: "Quelle est la sortie ?", options: ["3", "5", "2", "Erreur"], correct: 1, points: 1.25, difficulty: "Assez Facile" },
@@ -408,7 +408,7 @@
                 { id: 57, code: `i = 10\nwhile i >= 5:\n    i -= 2\nprint(i)`, question: "Quelle est la sortie ?", options: ["5", "4", "6", "3"], correct: 1, points: 1.75, difficulty: "Assez Difficile" },
                 { id: 58, code: `x = 1\ni = 1\nwhile i <= 5:\n    x *= i\n    i += 1\nprint(x)`, question: "Quelle est la sortie ?", options: ["5", "24", "120", "720"], correct: 2, points: 2, difficulty: "Difficile" },
                 { id: 59, code: `n = 25\nwhile n > 10:\n    n //= 2\nprint(n)`, question: "Quelle est la sortie ?", options: ["6", "12", "3", "25"], correct: 0, points: 1.75, difficulty: "Assez Difficile" },
-                { id: 60, code: `for i in range(2):\n    for j in range(3):\n        print(f"{i},{j}", end=" ")`, question: "Quelle est la sortie ?", options: ["5", "6", "3", "2"], correct: 1, points: 2, difficulty: "Difficile" },
+                { id: 60, code: `for i in range(2):\n    for j in range(3):\n        print(f"{i},{j}", end=" ")`, question: "Quelle est l'ordre de la matrice ?", options: ["5", "6", "3", "2"], correct: 1, points: 2, difficulty: "Difficile" },
                 { id: 61, code: `def test3(n):\n    return n ** 3\nprint(test3(3))`, question: "Quelle est la sortie ?", options: ["9", "27", "6", "None"], correct: 1, points: 1.5, difficulty: "Moyen" },
                 { id: 62, code: `def test4(prenom):\n    return f"Salut {prenom}!"\nprint(test4("Marie"))`, question: "Quelle est la sortie ?", options: ["Salut", "Marie", "Salut Marie!", "Erreur"], correct: 2, points: 1.5, difficulty: "Moyen" },
                 { id: 63, code: `def test5(n):\n    return n > 0\nprint(test5(-5))`, question: "Quelle est la sortie ?", options: ["True", "False", "-5", "0"], correct: 1, points: 1.75, difficulty: "Assez Difficile" },
@@ -1389,6 +1389,7 @@
     </script>
 </body>
 </html>
+
 
 
 
